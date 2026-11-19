@@ -21,10 +21,16 @@ body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-seri
 body.login-bg{background:#0c4a6e url('On-dis.jpg') center center/cover fixed no-repeat}
 body.app-bg::before{content:"";position:fixed;inset:0;background:url('PP22.png') center/cover no-repeat;z-index:-2}
 body.app-bg::after{content:"";position:fixed;inset:0;background:linear-gradient(160deg,rgba(236,253,245,.20) 0%,rgba(224,247,250,.20) 50%,rgba(224,236,255,.20) 100%);z-index:-1}
-header{background:linear-gradient(120deg,rgba(13,148,136,.92) 0%,rgba(8,145,178,.92) 50%,rgba(37,99,235,.92) 100%);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(8,145,178,.35);position:relative;overflow:hidden;backdrop-filter:blur(6px)}
-header::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -20%,rgba(255,255,255,.25),transparent 45%);pointer-events:none}
-header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.3px;text-shadow:0 2px 8px rgba(0,0,0,.35)}
-header .sub{font-size:14px;font-weight:600;opacity:1;margin-top:2px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+
+header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:12px 28px;min-height:80px;color:#0f172a;
+  background:rgba(255,255,255,.42);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);
+  border-bottom:1px solid rgba(255,255,255,.55);box-shadow:0 6px 24px rgba(2,44,34,.18)}
+.hdr-left{flex:1;min-width:200px}
+.hdr-left h1{margin:0;font-size:18px;font-weight:800;color:#0c4a6e;text-shadow:0 1px 2px rgba(255,255,255,.6)}
+.hdr-left .sub{font-size:13px;font-weight:600;color:#0f766e}
+.hdr-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:56px;width:auto;pointer-events:none}
+.hdr-right{flex:1;display:flex;justify-content:flex-end}
 main{padding:24px;max-width:1320px;margin:0 auto;animation:fadeUp .5s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -84,7 +90,7 @@ tbody tr:hover{background:#f0fdfa}
 a.link{color:#0891b2;font-weight:600;text-decoration:none}
 a.link:hover{text-decoration:underline}
 .btns{display:flex;gap:6px;flex-wrap:wrap}
-#login{max-width:420px;margin:60px auto;padding:0 16px;animation:pop .5s ease}
+#login{max-width:420px;margin:50px auto;padding:0 16px;animation:pop .5s ease}
 #login .card{padding:30px 28px;background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(255,255,255,.6);border-radius:22px;box-shadow:0 20px 50px rgba(2,44,34,.35)}
 #login h3{margin:0 0 6px;font-size:22px;font-weight:800;color:#0c4a6e;text-align:center}
 #login .login-sub{text-align:center;font-size:13px;color:#0f766e;margin-bottom:18px;font-weight:600}
@@ -93,16 +99,19 @@ a.link:hover{text-decoration:underline}
 #login button.login-btn{width:100%;margin-top:20px;padding:13px;font-size:16px;border-radius:12px;background:linear-gradient(120deg,#0d9488,#0891b2 50%,#2563eb);box-shadow:0 10px 24px rgba(8,145,178,.4)}
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}header h1{font-size:19px}}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}}
 </style>
 </head>
 <body class="login-bg">
 <header id="hdr">
-  <div>
-    <h1>📱 Supreme Lost Mode Tracking</h1>
+  <div class="hdr-left">
+    <h1>Supreme Lost Mode Tracking</h1>
     <div class="sub">ระบบติดตามเครื่องสำหรับโรงเรียน</div>
   </div>
-  <button class="ghost hidden" id="btnLogout" onclick="logout()">ออกจากระบบ</button>
+  <img class="hdr-logo" src="Supreme2.webp" alt="SUPREME">
+  <div class="hdr-right">
+    <button class="ghost hidden" id="btnLogout" onclick="logout()">ออกจากระบบ</button>
+  </div>
 </header>
 
 <div id="login" class="hidden">
