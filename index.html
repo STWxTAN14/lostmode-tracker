@@ -6,136 +6,159 @@
 <title>Supreme Lost Mode Tracking</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#f4f6fb;--surface:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--head:#1e3a8a;--input-border:#cbd5e1;--th:#f8fafc;--th-text:#475569;--ghost:#e2e8f0;--ghost-text:#1e293b}
+:root{--bg:#f1f5f9;--surface:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--brand2:#2563eb;--input:#cbd5e1;--th:#f8fafc;--th-text:#475569;--ghost:#e2e8f0;--ghost-text:#0f172a;--shadow:0 1px 2px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.05)}
 *{box-sizing:border-box}
-body{margin:0;font-family:'Sarabun',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
-header{background:var(--head);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-header h1{margin:0;font-size:20px}
-main{padding:20px;max-width:1200px;margin:auto}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
-.kpi{background:var(--surface);border-radius:12px;padding:16px;cursor:pointer;border-left:6px solid;box-shadow:0 1px 3px #0001;transition:.15s}
+body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+header{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow)}
+header h1{margin:0;font-size:20px;font-weight:700}
+header .sub{font-size:12px;opacity:.85}
+main{padding:24px;max-width:1280px;margin:0 auto}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.tab.on{background:var(--brand2);color:#fff;border-color:var(--brand2)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border-radius:14px;padding:16px 18px;cursor:pointer;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;border:1px solid var(--border)}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
 .kpi:hover{transform:translateY(-2px)}
-.kpi.active{outline:2px solid currentColor}
-.kpi .n{font-size:28px;font-weight:700}
+.kpi.active{outline:2px solid var(--c)}
+.kpi .n{font-size:30px;font-weight:700;color:var(--c)}
 .kpi .l{font-size:13px;color:var(--muted)}
-.blue{border-color:#2563eb;color:#2563eb}
-.orange{border-color:#ea580c;color:#ea580c}
-.green{border-color:#16a34a;color:#16a34a}
-.red{border-color:#dc2626;color:#dc2626}
-.card{background:var(--surface);border-radius:12px;padding:16px;box-shadow:0 1px 3px #0001;margin-bottom:16px}
+.c-blue{--c:#2563eb}.c-orange{--c:#ea580c}.c-green{--c:#16a34a}.c-red{--c:#dc2626}
+.card{background:var(--surface);border-radius:14px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-input,select,textarea{padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)}
-input[type=search]{flex:1;min-width:200px}
-button{padding:8px 14px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:inherit;cursor:pointer}
+.grow{flex:1;min-width:220px}
+input,select,textarea{padding:9px 12px;border:1px solid var(--input);border-radius:10px;font:inherit;background:var(--surface);color:var(--text);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+input[type=search]{width:100%}
+button{padding:9px 16px;border:0;border-radius:10px;background:var(--brand2);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button:hover{filter:brightness(1.07)}
 button.ghost{background:var(--ghost);color:var(--ghost-text)}
 button.danger{background:#dc2626}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;margin-top:12px;min-width:1040px}
-th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-th{background:var(--th);font-size:13px;color:var(--th-text)}
-.badge{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+button.ok{background:#16a34a}
+button.small{padding:6px 10px;font-size:13px;border-radius:8px}
+.table-wrap{overflow-x:auto;margin-top:14px;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:1300px}
+th,td{padding:11px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;white-space:nowrap}
+th{background:var(--th);font-size:13px;color:var(--th-text);font-weight:600}
+tbody tr:hover{background:#f8fafc}
+.badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;display:inline-block}
 .b-on{background:#dbeafe;color:#1d4ed8}
 .b-off{background:#ffedd5;color:#c2410c}
-.b-ok{background:#dcfce7;color:#15803d}
-.b-pend{background:#fee2e2;color:#b91c1c}
-.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:16px}
+.b-sent{background:#dcfce7;color:#15803d}
+.b-sending{background:#fef9c3;color:#a16207}
+.b-notsent{background:#fee2e2;color:#b91c1c}
+.b-zone{background:#ede9fe;color:#6d28d9}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal.show{display:flex}
-.modal .box{background:var(--surface);color:var(--text);border-radius:12px;padding:20px;width:100%;max-width:560px;max-height:90vh;overflow:auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--th-text)}
+.modal .box{background:var(--surface);color:var(--text);border-radius:16px;padding:22px;width:100%;max-width:600px;max-height:90vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h3{margin:0 0 14px;font-size:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--th-text)}
+.field input,.field select,.field textarea{font-size:15px;color:var(--text)}
 .full{grid-column:1/-1}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
 .muted{color:var(--muted);font-size:13px}
-.small{padding:4px 8px;font-size:13px}
-a.link{color:#2563eb}
-#login{max-width:360px;margin:60px auto}
-#login .card{padding:24px}
+a.link{color:var(--brand2);font-weight:600;text-decoration:none}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+#login{max-width:380px;margin:70px auto;padding:0 16px}
+#login .card{padding:26px}
 .hidden{display:none !important}
-#status{font-size:13px;margin-top:8px}
-@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+#status{font-size:13px;margin-top:10px;color:#dc2626}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>📱 Supreme Lost Mode Tracking</h1>
+  <div>
+    <h1>📱 Supreme Lost Mode Tracking</h1>
+    <div class="sub">ระบบติดตามเครื่องสำหรับโรงเรียน</div>
+  </div>
   <button class="ghost hidden" id="btnLogout" onclick="logout()">ออกจากระบบ</button>
 </header>
 
 <div id="login" class="hidden">
   <div class="card">
-    <h3 style="margin-top:0">เข้าสู่ระบบ</h3>
+    <h3 style="margin:0 0 14px">เข้าสู่ระบบ</h3>
     <div class="field">อีเมล<input id="lEmail" type="email" autocomplete="username"></div>
-    <div class="field" style="margin-top:8px">รหัสผ่าน<input id="lPass" type="password" autocomplete="current-password"></div>
+    <div class="field" style="margin-top:10px">รหัสผ่าน<input id="lPass" type="password" autocomplete="current-password"></div>
     <div class="actions"><button onclick="login()">เข้าสู่ระบบ</button></div>
-    <div id="loginErr" class="muted" style="color:#dc2626"></div>
+    <div id="loginErr" class="muted" style="color:#dc2626;margin-top:8px"></div>
   </div>
 </div>
 
 <main id="app" class="hidden">
-  <div class="kpis">
-    <div class="kpi blue" data-k="online"><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
-    <div class="kpi orange" data-k="offline"><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
-    <div class="kpi green" data-k="located"><div class="n" id="k3">0</div><div class="l">พบพิกัดแล้ว</div></div>
-    <div class="kpi red" data-k="pending"><div class="n" id="k4">0</div><div class="l">รออัปเดตพิกัด</div></div>
+  <div class="tabs">
+    <button class="tab on" id="tabMain" onclick="setView('main')">รายการ Lost Mode</button>
+    <button class="tab" id="tabHist" onclick="setView('history')">ประวัติ (Finish แล้ว)</button>
+  </div>
+
+  <div class="kpis" id="kpis">
+    <div class="kpi c-blue" data-k="online"><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
+    <div class="kpi c-orange" data-k="offline"><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
+    <div class="kpi c-green" data-k="sent"><div class="n" id="k3">0</div><div class="l">ส่ง Lost Mode แล้ว</div></div>
+    <div class="kpi c-red" data-k="notsent"><div class="n" id="k4">0</div><div class="l">ยังไม่ได้ส่ง</div></div>
   </div>
 
   <div class="card">
     <div class="toolbar">
-      <input type="search" id="search" placeholder="ค้นหาชื่อ / รุ่น / IMEI / เบอร์ / หมายเหตุ / ผู้บันทึก">
+      <input type="search" id="search" class="grow" placeholder="ค้นหาโรงเรียน / รุ่น / SN / เบอร์ / หมายเหตุ / ผู้บันทึก">
       <input type="date" id="dFrom" title="จากวันที่">
       <input type="date" id="dTo" title="ถึงวันที่">
+      <select id="fZone">
+        <option value="all">Zone: ทั้งหมด</option>
+        <option value="1">Zone 1</option><option value="2">Zone 2</option>
+        <option value="3">Zone 3</option><option value="4">Zone 4</option>
+      </select>
       <select id="fStatus">
         <option value="all">สถานะตอนกดสั่ง: ทั้งหมด</option>
         <option value="online">Online</option>
         <option value="offline">Offline</option>
       </select>
-      <select id="fLoc">
-        <option value="all">พิกัด: ทั้งหมด</option>
-        <option value="yes">พบพิกัดแล้ว</option>
-        <option value="no">รออัปเดต</option>
+      <select id="fLost">
+        <option value="all">Lost Mode: ทั้งหมด</option>
+        <option value="sent">ส่งแล้ว</option>
+        <option value="sending">กำลังส่ง</option>
+        <option value="not_sent">ยังไม่ได้ส่ง</option>
       </select>
       <button class="ghost" id="btnClear">ล้างตัวกรอง</button>
       <button onclick="openAdd()">+ เพิ่มรายการ</button>
       <button class="ghost" onclick="exportCSV()">⬇ Export CSV</button>
     </div>
-
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>ชื่อเจ้าของ</th>
-            <th>รุ่น</th>
-            <th>IMEI / Serial</th>
-            <th>เบอร์ติดต่อ</th>
-            <th>วัน-เวลาที่กดสั่ง</th>
-            <th>สถานะขณะกดสั่ง</th>
-            <th>สถานะพิกัด</th>
-            <th>แผนที่</th>
-            <th>หมายเหตุ</th>
-            <th>ผู้บันทึก</th>
-            <th>จัดการ</th>
+            <th>#</th><th>ชื่อโรงเรียน</th><th>Zone</th><th>รุ่น</th><th>SN / IMEI</th>
+            <th>เบอร์ติดต่อ</th><th>วัน-เวลาที่กดสั่ง</th><th>สถานะขณะกดสั่ง</th>
+            <th>สถานะปัจจุบัน (MDM)</th><th>Lost Mode</th><th>แผนที่</th>
+            <th>หมายเหตุ</th><th>ผู้บันทึก</th><th>จัดการ</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <div class="muted" id="count" style="margin-top:8px"></div>
-    <div id="status" class="muted"></div>
+    <div class="muted" id="count" style="margin-top:10px"></div>
+    <div id="status"></div>
   </div>
 </main>
 
 <div class="modal" id="mAdd">
   <div class="box">
-    <h3 style="margin-top:0">เพิ่มรายการ Lost Mode</h3>
+    <h3>เพิ่มรายการ Lost Mode</h3>
     <div class="grid2">
-      <div class="field">ชื่อเจ้าของ<input id="aOwner"></div>
-      <div class="field">เบอร์ติดต่อ<input id="aPhone"></div>
+      <div class="field">ชื่อโรงเรียน<input id="aSchool"></div>
+      <div class="field">Zone
+        <select id="aZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></select>
+      </div>
       <div class="field">รุ่นเครื่อง<input id="aModel"></div>
-      <div class="field">IMEI / Serial<input id="aImei"></div>
+      <div class="field">SN / IMEI<input id="aImei"></div>
+      <div class="field">เบอร์ติดต่อ<input id="aPhone"></div>
       <div class="field">ผู้บันทึก (พิมพ์ชื่อตัวเอง)<input id="aRecorder"></div>
       <div class="field">สถานะเครื่องขณะกดสั่ง
         <select id="aStatus"><option value="online">Online</option><option value="offline">Offline</option></select>
+      </div>
+      <div class="field">สถานะ Lost Mode
+        <select id="aLost"><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sending">กำลังส่ง</option><option value="sent">ส่งแล้ว</option></select>
       </div>
       <div class="field full">หมายเหตุ<textarea id="aNote" rows="2"></textarea></div>
     </div>
@@ -148,9 +171,18 @@ a.link{color:#2563eb}
 
 <div class="modal" id="mUpd">
   <div class="box">
-    <h3 style="margin-top:0">อัปเดตสถานะและพิกัด</h3>
+    <h3>อัปเดตสถานะ</h3>
     <div class="grid2">
-      <div class="field full">สถานะพิกัด
+      <div class="field">สถานะเครื่อง (MDM)
+        <select id="uStatus"><option value="online">Online</option><option value="offline">Offline</option></select>
+      </div>
+      <div class="field">สถานะ Lost Mode
+        <select id="uLost"><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sending">กำลังส่ง</option><option value="sent">ส่งแล้ว</option></select>
+      </div>
+      <div class="field">Zone
+        <select id="uZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></select>
+      </div>
+      <div class="field">สถานะพิกัด
         <select id="uLoc"><option value="no">รออัปเดตพิกัด</option><option value="yes">พบพิกัดแล้ว</option></select>
       </div>
       <div class="field full">ลิงก์พิกัด (Google Maps URL หรือ ละติจูด,ลองจิจูด)
@@ -170,13 +202,13 @@ const SUPABASE_URL = 'https://tpknvimfglagybnxxqnl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JAHEFk9X5PE7qrt23xOFLw_Usn80YBA';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let data = [];
-let kpiFilter = null;
-let editingId = null;
+let data = [], history = [];
+let view = 'main', kpiFilter = null, editingId = null;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
 
 function fmtDate(ts){
+  if (!ts) return '-';
   const d = new Date(ts);
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()+543} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
@@ -189,75 +221,123 @@ function mapUrl(v){
   const m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
   return m ? `https://www.google.com/maps?q=${m[1]},${m[2]}` : '';
 }
+const LOST_LABEL = {not_sent:'ยังไม่ได้ส่ง', sending:'กำลังส่ง', sent:'ส่งแล้ว'};
+const LOST_CLASS = {not_sent:'b-notsent', sending:'b-sending', sent:'b-sent'};
+
 function toRow(r){
   return {
-    id: r.id, owner: r.owner || '', model: r.model || '', imei: r.imei || '',
+    id: r.id, school: r.school || '', zone: r.zone || '1', model: r.model || '', imei: r.imei || '',
     phone: r.phone || '', note: r.note || '', recorder: r.recorder || '',
-    status: r.status, located: r.located, link: r.link || '',
-    lostAt: new Date(r.lost_at).getTime()
+    status: r.status, lost_status: r.lost_status || 'not_sent', located: r.located || 'no',
+    link: r.link || '', lostAt: r.lost_at ? new Date(r.lost_at).getTime() : 0,
+    finishedAt: r.finished_at ? new Date(r.finished_at).getTime() : 0
   };
+}
+function matchText(r){
+  return `${r.school}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase();
 }
 function filtered(){
   const q = $('search').value.trim().toLowerCase();
   const from = $('dFrom').value, to = $('dTo').value;
-  const st = $('fStatus').value, loc = $('fLoc').value;
+  const zone = $('fZone').value, st = $('fStatus').value, lost = $('fLost').value;
   return data.filter(r => {
-    if (q && !`${r.owner}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase().includes(q)) return false;
+    if (q && !matchText(r).includes(q)) return false;
     if (from && r.lostAt < new Date(from).getTime()) return false;
     if (to && r.lostAt > new Date(to).getTime() + 86399999) return false;
+    if (zone !== 'all' && r.zone !== zone) return false;
     if (st !== 'all' && r.status !== st) return false;
-    if (loc !== 'all' && r.located !== loc) return false;
+    if (lost !== 'all' && r.lost_status !== lost) return false;
     if (kpiFilter === 'online' && r.status !== 'online') return false;
     if (kpiFilter === 'offline' && r.status !== 'offline') return false;
-    if (kpiFilter === 'located' && r.located !== 'yes') return false;
-    if (kpiFilter === 'pending' && r.located !== 'no') return false;
+    if (kpiFilter === 'sent' && r.lost_status !== 'sent') return false;
+    if (kpiFilter === 'notsent' && r.lost_status !== 'not_sent') return false;
     return true;
   }).sort((a,b) => b.lostAt - a.lostAt);
 }
 function renderKpis(){
   $('k1').textContent = data.filter(r => r.status === 'online').length;
   $('k2').textContent = data.filter(r => r.status === 'offline').length;
-  $('k3').textContent = data.filter(r => r.located === 'yes').length;
-  $('k4').textContent = data.filter(r => r.located === 'no').length;
+  $('k3').textContent = data.filter(r => r.lost_status === 'sent').length;
+  $('k4').textContent = data.filter(r => r.lost_status === 'not_sent').length;
   document.querySelectorAll('.kpi').forEach(el => el.classList.toggle('active', el.dataset.k === kpiFilter));
 }
 function render(){
   renderKpis();
+  if (view === 'history') return renderHistory();
   const list = filtered();
   $('rows').innerHTML = list.map((r, i) => {
     const link = mapUrl(r.link);
     return `<tr>
       <td>${i+1}</td>
-      <td>${esc(r.owner)}</td>
+      <td>${esc(r.school)}</td>
+      <td><span class="badge b-zone">Zone ${esc(r.zone)}</span></td>
       <td>${esc(r.model)}</td>
       <td>${esc(r.imei)}</td>
       <td>${esc(r.phone)}</td>
       <td>${fmtDate(r.lostAt)}</td>
       <td><span class="badge ${r.status==='online'?'b-on':'b-off'}">${r.status==='online'?'Online':'Offline'}</span></td>
-      <td><span class="badge ${r.located==='yes'?'b-ok':'b-pend'}">${r.located==='yes'?'พบพิกัดแล้ว':'รออัปเดต'}</span></td>
+      <td><span class="badge ${r.status==='online'?'b-on':'b-off'}">${r.status==='online'?'Online':'Offline'}</span></td>
+      <td><span class="badge ${LOST_CLASS[r.lost_status]}">${LOST_LABEL[r.lost_status]}</span></td>
       <td>${link ? `<a class="link" href="${esc(link)}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
       <td>${esc(r.note)}</td>
       <td>${esc(r.recorder)}</td>
-      <td>
+      <td><div class="btns">
         <button class="small" onclick="openUpdate('${r.id}')">อัปเดต</button>
+        <button class="small ok" onclick="finishRecord('${r.id}')">Finish</button>
         <button class="small danger" onclick="removeRecord('${r.id}')">ลบ</button>
-      </td>
+      </div></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="12" class="muted" style="text-align:center;padding:24px">ไม่มีข้อมูล</td></tr>`;
+  }).join('') || `<tr><td colspan="14" class="muted" style="text-align:center;padding:24px">ไม่มีข้อมูล</td></tr>`;
   $('count').textContent = `แสดง ${list.length} จาก ${data.length} รายการ`;
+}
+function renderHistory(){
+  const q = $('search').value.trim().toLowerCase();
+  const list = history.filter(r => !q || matchText(r).includes(q)).sort((a,b) => b.finishedAt - a.finishedAt);
+  $('rows').innerHTML = list.map((r, i) => `<tr>
+      <td>${i+1}</td>
+      <td>${esc(r.school)}</td>
+      <td><span class="badge b-zone">Zone ${esc(r.zone)}</span></td>
+      <td>${esc(r.model)}</td>
+      <td>${esc(r.imei)}</td>
+      <td>${esc(r.phone)}</td>
+      <td>${fmtDate(r.lostAt)}</td>
+      <td><span class="badge ${r.status==='online'?'b-on':'b-off'}">${r.status==='online'?'Online':'Offline'}</span></td>
+      <td><span class="badge ${r.status==='online'?'b-on':'b-off'}">${r.status==='online'?'Online':'Offline'}</span></td>
+      <td><span class="badge ${LOST_CLASS[r.lost_status]}">${LOST_LABEL[r.lost_status]}</span></td>
+      <td>${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
+      <td>${esc(r.note)}</td>
+      <td>${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
+      <td>-</td>
+    </tr>`).join('') || `<tr><td colspan="14" class="muted" style="text-align:center;padding:24px">ยังไม่มีประวัติ</td></tr>`;
+  $('count').textContent = `ประวัติ ${list.length} รายการ`;
+}
+
+function setView(v){
+  view = v;
+  $('tabMain').classList.toggle('on', v === 'main');
+  $('tabHist').classList.toggle('on', v === 'history');
+  $('kpis').classList.toggle('hidden', v === 'history');
+  render();
 }
 function openM(id){ $(id).classList.add('show'); }
 function closeM(id){ $(id).classList.remove('show'); }
 
 async function loadData(){
-  const { data: rows, error } = await sb.from('lost_records').select('*').order('lost_at', { ascending: false });
-  if (error) { $('status').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + error.message; return; }
-  data = rows.map(toRow);
+  const [a, b] = await Promise.all([
+    sb.from('lost_records').select('*').order('lost_at', { ascending: false }),
+    sb.from('lost_history').select('*').order('finished_at', { ascending: false })
+  ]);
+  if (a.error) { $('status').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + a.error.message; return; }
+  data = a.data.map(toRow);
+  if (!b.error) history = b.data.map(r => ({ ...toRow(r), finishedAt: new Date(r.finished_at).getTime() }));
   render();
 }
+let channel = null;
 function subscribe(){
-  sb.channel('lost_records_changes')
+  if (channel) return;
+  channel = sb.channel('lost_changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'lost_records' }, () => loadData())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'lost_history' }, () => loadData())
     .subscribe();
 }
 
@@ -267,10 +347,7 @@ async function login(){
   $('lPass').value = '';
   showApp();
 }
-async function logout(){
-  await sb.auth.signOut();
-  location.reload();
-}
+async function logout(){ await sb.auth.signOut(); location.reload(); }
 async function showApp(){
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -280,20 +357,21 @@ async function showApp(){
 }
 
 function openAdd(){
-  ['aOwner','aPhone','aModel','aImei','aNote','aRecorder'].forEach(id => $(id).value = '');
-  $('aStatus').value = 'online';
+  ['aSchool','aModel','aImei','aPhone','aNote','aRecorder'].forEach(id => $(id).value = '');
+  $('aZone').value = '1'; $('aStatus').value = 'online'; $('aLost').value = 'not_sent';
   openM('mAdd');
 }
 async function addRecord(){
-  const owner = $('aOwner').value.trim();
+  const school = $('aSchool').value.trim();
   const imei = $('aImei').value.trim();
   const recorder = $('aRecorder').value.trim();
-  if (!owner && !imei) { alert('กรุณากรอกชื่อเจ้าของหรือ IMEI'); return; }
+  if (!school && !imei) { alert('กรุณากรอกชื่อโรงเรียนหรือ SN'); return; }
   if (!recorder) { alert('กรุณาพิมพ์ชื่อผู้บันทึก'); return; }
   const { error } = await sb.from('lost_records').insert({
-    owner, imei, model: $('aModel').value.trim(), phone: $('aPhone').value.trim(),
-    note: $('aNote').value.trim(), recorder,
-    status: $('aStatus').value, located: 'no', link: '', lost_at: new Date().toISOString()
+    school, zone: $('aZone').value, model: $('aModel').value.trim(), imei,
+    phone: $('aPhone').value.trim(), note: $('aNote').value.trim(), recorder,
+    status: $('aStatus').value, lost_status: $('aLost').value, located: 'no', link: '',
+    lost_at: new Date().toISOString()
   });
   if (error) { alert('บันทึกไม่สำเร็จ: ' + error.message); return; }
   closeM('mAdd'); loadData();
@@ -301,6 +379,9 @@ async function addRecord(){
 function openUpdate(id){
   editingId = id;
   const r = data.find(x => x.id === id);
+  $('uStatus').value = r.status;
+  $('uLost').value = r.lost_status;
+  $('uZone').value = r.zone;
   $('uLoc').value = r.located;
   $('uLink').value = r.link || '';
   openM('mUpd');
@@ -314,9 +395,25 @@ async function saveUpdate(){
   const link = $('uLink').value.trim();
   if (link && !mapUrl(link)) { alert('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง'); return; }
   const located = link ? 'yes' : $('uLoc').value;
-  const { error } = await sb.from('lost_records').update({ link, located }).eq('id', editingId);
+  const { error } = await sb.from('lost_records').update({
+    status: $('uStatus').value, lost_status: $('uLost').value, zone: $('uZone').value, link, located
+  }).eq('id', editingId);
   if (error) { alert('อัปเดตไม่สำเร็จ: ' + error.message); return; }
   closeM('mUpd'); loadData();
+}
+async function finishRecord(id){
+  const r = data.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm(`Finish เครื่องของ "${r.school || r.imei}" ?\nข้อมูลจะถูกย้ายไปหน้าประวัติ`)) return;
+  const { error: e1 } = await sb.from('lost_history').insert({
+    school: r.school, zone: r.zone, model: r.model, imei: r.imei, phone: r.phone, note: r.note,
+    recorder: r.recorder, status: r.status, lost_status: r.lost_status, link: r.link,
+    lost_at: new Date(r.lostAt).toISOString()
+  });
+  if (e1) { alert('ย้ายไปประวัติไม่สำเร็จ: ' + e1.message); return; }
+  const { error: e2 } = await sb.from('lost_records').delete().eq('id', id);
+  if (e2) { alert('ลบรายการเดิมไม่สำเร็จ: ' + e2.message); return; }
+  loadData();
 }
 async function removeRecord(id){
   if (!confirm('ยืนยันการลบรายการนี้?')) return;
@@ -325,21 +422,17 @@ async function removeRecord(id){
   loadData();
 }
 function exportCSV(){
-  const list = filtered();
-  const head = ['ชื่อเจ้าของ','รุ่น','IMEI/Serial','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะขณะกดสั่ง','สถานะพิกัด','ลิงก์พิกัด','หมายเหตุ','ผู้บันทึก'];
+  const list = view === 'history' ? history : filtered();
+  const head = ['ชื่อโรงเรียน','Zone','รุ่น','SN/IMEI','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะขณะกดสั่ง','สถานะปัจจุบัน','Lost Mode','ลิงก์พิกัด','หมายเหตุ','ผู้บันทึก'];
   const rows = list.map(r => [
-    r.owner, r.model, r.imei, r.phone, fmtDate(r.lostAt),
-    r.status === 'online' ? 'Online' : 'Offline',
-    r.located === 'yes' ? 'พบพิกัดแล้ว' : 'รออัปเดต',
-    r.link, r.note, r.recorder
+    r.school, 'Zone '+r.zone, r.model, r.imei, r.phone, fmtDate(r.lostAt),
+    r.status === 'online' ? 'Online' : 'Offline', r.status === 'online' ? 'Online' : 'Offline',
+    LOST_LABEL[r.lost_status], r.link, r.note, r.recorder
   ]);
-  const csv = [head, ...rows]
-    .map(row => row.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const csv = [head, ...rows].map(row => row.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `lostmode_${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `lostmode_${view}_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
 
@@ -347,10 +440,10 @@ document.querySelectorAll('.kpi').forEach(el => el.addEventListener('click', () 
   kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
   render();
 }));
-['search','dFrom','dTo','fStatus','fLoc'].forEach(id => $(id).addEventListener('input', render));
+['search','dFrom','dTo','fZone','fStatus','fLost'].forEach(id => $(id).addEventListener('input', render));
 $('btnClear').addEventListener('click', () => {
   ['search','dFrom','dTo'].forEach(id => $(id).value = '');
-  $('fStatus').value = 'all'; $('fLoc').value = 'all';
+  ['fZone','fStatus','fLost'].forEach(id => $(id).value = 'all');
   kpiFilter = null; render();
 });
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
