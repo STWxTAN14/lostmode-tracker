@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบติดตามเครื่อง Lost Mode</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f4f6fb;--surface:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--head:#1e3a8a;--input-border:#cbd5e1;--th:#f8fafc;--th-text:#475569;--ghost:#e2e8f0;--ghost-text:#1e293b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f172a;--surface:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--head:#1e3a8a;--input-border:#475569;--th:#273449;--th-text:#cbd5e1;--ghost:#334155;--ghost-text:#e2e8f0}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f172a;--surface:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--input-border:#475569;--th:#273449;--th-text:#cbd5e1;--ghost:#334155;--ghost-text:#e2e8f0}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Sarabun',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+header{background:var(--head);color:#fff;padding:16px 24px}
+header h1{margin:0;font-size:20px}
+main{padding:20px;max-width:1200px;margin:auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border-radius:12px;padding:16px;cursor:pointer;border-left:6px solid;box-shadow:0 1px 3px #0001;transition:.15s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi.active{outline:2px solid currentColor}
+.kpi .n{font-size:28px;font-weight:700}
+.kpi .l{font-size:13px;color:var(--muted)}
+.blue{border-color:#2563eb;color:#2563eb}
+.orange{border-color:#ea580c;color:#ea580c}
+.green{border-color:#16a34a;color:#16a34a}
+.red{border-color:#dc2626;color:#dc2626}
+.card{background:var(--surface);border-radius:12px;padding:16px;box-shadow:0 1px 3px #0001;margin-bottom:16px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select,textarea{padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)}
+input[type=search]{flex:1;min-width:200px}
+button{padding:8px 14px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:inherit;cursor:pointer}
+button.ghost{background:var(--ghost);color:var(--ghost-text)}
+button.danger{background:#dc2626}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px;min-width:960px}
+th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:var(--th);font-size:13px;color:var(--th-text)}
+.badge{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-on{background:#dbeafe;color:#1d4ed8}
+.b-off{background:#ffedd5;color:#c2410c}
+.b-ok{background:#dcfce7;color:#15803d}
+.b-pend{background:#fee2e2;color:#b91c1c}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}
+.modal .box{background:var(--surface);color:var(--text);border-radius:12px;padding:20px;width:100%;max-width:560px;max-height:90vh;overflow:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--th-text)}
+.full{grid-column:1/-1}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}
+.small{padding:4px 8px;font-size:13px}
+a.link{color:#2563eb}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>📱 ระบบติดตามเครื่อง &amp; Lost Mode</h1></header>
+<main>
+
+  <div class="kpis">
+    <div class="kpi blue" data-k="online"><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
+    <div class="kpi orange" data-k="offline"><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
+    <div class="kpi green" data-k="located"><div class="n" id="k3">0</div><div class="l">พบพิกัดแล้ว</div></div>
+    <div class="kpi red" data-k="pending"><div class="n" id="k4">0</div><div class="l">รออัปเดตพิกัด</div></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="ค้นหาชื่อ / รุ่น / IMEI / เบอร์ / หมายเหตุ">
+      <input type="date" id="dFrom" title="จากวันที่">
+      <input type="date" id="dTo" title="ถึงวันที่">
+      <select id="fStatus">
+        <option value="all">สถานะตอนกดสั่ง: ทั้งหมด</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+      </select>
+      <select id="fLoc">
+        <option value="all">พิกัด: ทั้งหมด</option>
+        <option value="yes">พบพิกัดแล้ว</option>
+        <option value="no">รออัปเดต</option>
+      </select>
+      <button class="ghost" id="btnClear">ล้างตัวกรอง</button>
+      <button onclick="openAdd()">+ เพิ่มรายการ</button>
+      <button class="ghost" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ชื่อเจ้าของ</th>
+            <th>รุ่น</th>
+            <th>IMEI / Serial</th>
+            <th>เบอร์ติดต่อ</th>
+            <th>วัน-เวลาที่กดสั่ง</th>
+            <th>สถานะขณะกดสั่ง</th>
+            <th>สถานะพิกัด</th>
+            <th>แผนที่</th>
+            <th>หมายเหตุ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="muted" id="count" style="margin-top:8px"></div>
+  </div>
+</main>
+
+<div class="modal" id="mAdd">
+  <div class="box">
+    <h3 style="margin-top:0">เพิ่มรายการ Lost Mode</h3>
+    <div class="grid2">
+      <div class="field">ชื่อเจ้าของ<input id="aOwner"></div>
+      <div class="field">เบอร์ติดต่อ<input id="aPhone"></div>
+      <div class="field">รุ่นเครื่อง<input id="aModel"></div>
+      <div class="field">IMEI / Serial<input id="aImei"></div>
+      <div class="field full">สถานะเครื่องขณะกดสั่ง
+        <select id="aStatus"><option value="online">Online</option><option value="offline">Offline</option></select>
+      </div>
+      <div class="field full">หมายเหตุ<textarea id="aNote" rows="2"></textarea></div>
+    </div>
+    <div class="actions">
+      <button class="ghost" onclick="closeM('mAdd')">ยกเลิก</button>
+      <button onclick="addRecord()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mUpd">
+  <div class="box">
+    <h3 style="margin-top:0">อัปเดตสถานะและพิกัด</h3>
+    <div class="grid2">
+      <div class="field full">สถานะพิกัด
+        <select id="uLoc"><option value="no">รออัปเดตพิกัด</option><option value="yes">พบพิกัดแล้ว</option></select>
+      </div>
+      <div class="field full">ลิงก์พิกัด (Google Maps URL หรือ ละติจูด,ลองจิจูด)
+        <input id="uLink" placeholder="เช่น 13.7563,100.5018 หรือ https://maps.google.com/...">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="ghost" onclick="openMapFromModal()">🗺 เปิดแผนที่</button>
+      <button class="ghost" onclick="closeM('mUpd')">ยกเลิก</button>
+      <button onclick="saveUpdate()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = [];
+let kpiFilter = null;
+let editingId = null;
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+
+function fmtDate(ts){
+  const d = new Date(ts);
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()+543} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function mapUrl(v){
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v;
+  const m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  return m ? `https://www.google.com/maps?q=${m[1]},${m[2]}` : '';
+}
+function filtered(){
+  const q = $('search').value.trim().toLowerCase();
+  const from = $('dFrom').value, to = $('dTo').value;
+  const st = $('fStatus').value, loc = $('fLoc').value;
+  return data.filter(r => {
+    if (q && !`${r.owner}${r.model}${r.imei}${r.phone}${r.note}`.toLowerCase().includes(q)) return false;
+    if (from && r.lostAt < new Date(from).getTime()) return false;
+    if (to && r.lostAt > new Date(to).getTime() + 86399999) return false;
+    if (st !== 'all' && r.status !== st) return false;
+    if (loc !== 'all' && r.located !== loc) return false;
+    if (kpiFilter === 'online' && r.status !== 'online') return false;
+    if (kpiFilter === 'offline' && r.status !== 'offline') return false;
+    if (kpiFilter === 'located' && r.located !== 'yes') return false;
+    if (kpiFilter === 'pending' && r.located !== 'no') return false;
+    return true;
+  }).sort((a,b) => b.lostAt - a.lostAt);
+}
+function renderKpis(){
+  $('k1').textContent = data.filter(r => r.status === 'online').length;
+  $('k2').textContent = data.filter(r => r.status === 'offline').length;
+  $('k3').textContent = data.filter(r => r.located === 'yes').length;
+  $('k4').textContent = data.filter(r => r.located === 'no').length;
+  document.querySelectorAll('.kpi').forEach(el => el.classList.toggle('active', el.dataset.k === kpiFilter));
+}
+function render(){
+  renderKpis();
+  const list = filtered();
+  $('rows').innerHTML = list.map((r, i) => {
+    const link = mapUrl(r.link);
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${esc(r.owner)}</td>
+      <td>${esc(r.model)}</td>
+      <td>${esc(r.imei)}</td>
+      <td>${esc(r.phone)}</td>
+      <td>${fmtDate(r.lostAt)}</td>
+      <td><span class="badge ${r.status==='online'?'b-on':'b-off'}">${r.status==='online'?'Online':'Offline'}</span></td>
+      <td><span class="badge ${r.located==='yes'?'b-ok':'b-pend'}">${r.located==='yes'?'พบพิกัดแล้ว':'รออัปเดต'}</span></td>
+      <td>${link ? `<a class="link" href="${esc(link)}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
+      <td>${esc(r.note)}</td>
+      <td>
+        <button class="small" onclick="openUpdate('${r.id}')">อัปเดต</button>
+        <button class="small danger" onclick="removeRecord('${r.id}')">ลบ</button>
+      </td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="11" class="muted" style="text-align:center;padding:24px">ไม่มีข้อมูล</td></tr>`;
+  $('count').textContent = `แสดง ${list.length} จาก ${data.length} รายการ`;
+}
+function openM(id){ $(id).classList.add('show'); }
+function closeM(id){ $(id).classList.remove('show'); }
+function openAdd(){
+  ['aOwner','aPhone','aModel','aImei','aNote'].forEach(id => $(id).value = '');
+  $('aStatus').value = 'online';
+  openM('mAdd');
+}
+function addRecord(){
+  const owner = $('aOwner').value.trim();
+  const imei = $('aImei').value.trim();
+  if (!owner && !imei) { alert('กรุณากรอกชื่อเจ้าของหรือ IMEI'); return; }
+  data.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    owner, phone: $('aPhone').value.trim(),
+    model: $('aModel').value.trim(), imei,
+    note: $('aNote').value.trim(),
+    status: $('aStatus').value,
+    lostAt: Date.now(),
+    located: 'no', link: ''
+  });
+  closeM('mAdd'); render();
+}
+function openUpdate(id){
+  editingId = id;
+  const r = data.find(x => x.id === id);
+  $('uLoc').value = r.located;
+  $('uLink').value = r.link || '';
+  openM('mUpd');
+}
+function openMapFromModal(){
+  const url = mapUrl($('uLink').value.trim());
+  if (!url) { alert('ลิงก์หรือพิกัดไม่ถูกต้อง'); return; }
+  window.open(url, '_blank', 'noopener');
+}
+function saveUpdate(){
+  const r = data.find(x => x.id === editingId);
+  if (!r) return;
+  const link = $('uLink').value.trim();
+  if (link && !mapUrl(link)) { alert('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง'); return; }
+  r.link = link;
+  r.located = link ? 'yes' : $('uLoc').value;
+  closeM('mUpd'); render();
+}
+function removeRecord(id){
+  if (!confirm('ยืนยันการลบรายการนี้?')) return;
+  data = data.filter(x => x.id !== id);
+  render();
+}
+function exportCSV(){
+  const list = filtered();
+  const head = ['ชื่อเจ้าของ','รุ่น','IMEI/Serial','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะขณะกดสั่ง','สถานะพิกัด','ลิงก์พิกัด','หมายเหตุ'];
+  const rows = list.map(r => [
+    r.owner, r.model, r.imei, r.phone, fmtDate(r.lostAt),
+    r.status === 'online' ? 'Online' : 'Offline',
+    r.located === 'yes' ? 'พบพิกัดแล้ว' : 'รออัปเดต',
+    r.link, r.note
+  ]);
+  const csv = [head, ...rows]
+    .map(row => row.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lostmode_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+document.querySelectorAll('.kpi').forEach(el => el.addEventListener('click', () => {
+  kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
+  render();
+}));
+['search','dFrom','dTo','fStatus','fLoc'].forEach(id => $(id).addEventListener('input', render));
+$('btnClear').addEventListener('click', () => {
+  ['search','dFrom','dTo'].forEach(id => $(id).value = '');
+  $('fStatus').value = 'all'; $('fLoc').value = 'all';
+  kpiFilter = null; render();
+});
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
+  if (e.target === m) m.classList.remove('show');
+}));
+render();
+</script>
+</body>
+</html>
