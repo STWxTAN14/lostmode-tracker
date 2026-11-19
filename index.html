@@ -17,9 +17,9 @@
 html,body{min-height:100%}
 body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);font-size:15px;line-height:1.5;
   background:linear-gradient(160deg,#ecfdf5 0%,#e0f7fa 50%,#e0ecff 100%);background-attachment:fixed}
-body.login-bg{background:url('opengraph.jpg') center/cover fixed no-repeat #0c4a6e}
-body.app-bg::before{content:"";position:fixed;inset:0;background:url('img-1.webp') center/cover no-repeat;z-index:-2}
-body.app-bg::after{content:"";position:fixed;inset:0;background:linear-gradient(160deg,rgba(236,253,245,.90) 0%,rgba(224,247,250,.90) 50%,rgba(224,236,255,.90) 100%);z-index:-1}
+body.login-bg{background:#0c4a6e url('img-1.webp') center center/contain fixed no-repeat}
+body.app-bg::before{content:"";position:fixed;inset:0;background:url('OIP.webp') center/cover no-repeat;z-index:-2}
+body.app-bg::after{content:"";position:fixed;inset:0;background:linear-gradient(160deg,rgba(236,253,245,.20) 0%,rgba(224,247,250,.20) 50%,rgba(224,236,255,.20) 100%);z-index:-1}
 header{background:linear-gradient(120deg,#0d9488 0%,#0891b2 50%,#2563eb 100%);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(8,145,178,.35);position:relative;overflow:hidden}
 header::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -20%,rgba(255,255,255,.25),transparent 45%);pointer-events:none}
 header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.2px}
@@ -27,11 +27,11 @@ header .sub{font-size:12px;opacity:.9}
 main{padding:24px;max-width:1320px;margin:0 auto;animation:fadeUp .5s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
-.tabs{display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,.75);padding:6px;border-radius:14px;width:fit-content;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,.92);padding:6px;border-radius:14px;width:fit-content;box-shadow:var(--shadow)}
 .tab{background:transparent;color:var(--navy);padding:9px 18px}
 .tab.on{background:linear-gradient(120deg,#0d9488,#2563eb);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.3)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px}
-.kpi{background:var(--surface);border-radius:16px;padding:18px 20px;cursor:pointer;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:1px solid var(--border);animation:pop .45s ease both}
+.kpi{background:rgba(255,255,255,.96);border-radius:16px;padding:18px 20px;cursor:pointer;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:1px solid var(--border);animation:pop .45s ease both}
 .kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}
 .kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:linear-gradient(180deg,var(--c1),var(--c2))}
 .kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:var(--c1);opacity:.08}
@@ -43,7 +43,7 @@ main{padding:24px;max-width:1320px;margin:0 auto;animation:fadeUp .5s ease both}
 .c-orange{--c1:#f59e0b;--c2:#ea580c}
 .c-green{--c1:#10b981;--c2:#0d9488}
 .c-red{--c1:#f43f5e;--c2:#db2777}
-.card{background:rgba(255,255,255,.94);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
+.card{background:rgba(255,255,255,.96);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .grow{flex:1;min-width:240px}
 input,select,textarea{padding:10px 12px;border:1px solid var(--input);border-radius:10px;font:inherit;background:#fff;color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
@@ -333,7 +333,9 @@ function renderHistory(){
       <td>${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
       <td>${esc(r.note)}</td>
       <td>${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
-      <td>-</td>
+      <td><div class="btns">
+        <button class="small danger" onclick="removeHistory('${r.id}')">ลบ</button>
+      </div></td>
     </tr>`).join('') || `<tr><td colspan="13" class="muted" style="text-align:center;padding:30px">ยังไม่มีประวัติ</td></tr>`;
   $('count').textContent = `ประวัติ ${list.length} รายการ`;
 }
@@ -427,74 +429,3 @@ function openMapFromModal(){
 async function saveUpdate(){
   const link = $('uLink').value.trim();
   if (link && !mapUrl(link)) return warn('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง');
-  const located = link ? 'yes' : $('uLoc').value;
-  const { error } = await sb.from('lost_records').update({
-    status: $('uStatus').value, lost_status: $('uLost').value, zone: $('uZone').value, link, located
-  }).eq('id', editingId);
-  if (error) return fail('อัปเดตไม่สำเร็จ: ' + error.message);
-  closeM('mUpd'); ok('อัปเดตเรียบร้อย'); loadData();
-}
-async function finishRecord(id){
-  const r = data.find(x => x.id === id);
-  if (!r) return;
-  const c = await Swal.fire({
-    title:'Finish เครื่องนี้?', html:`<b>${esc(r.school || r.imei)}</b><br>ข้อมูลจะถูกย้ายไปหน้าประวัติ`,
-    icon:'question', showCancelButton:true, confirmButtonText:'ใช่, Finish', cancelButtonText:'ยกเลิก', confirmButtonColor:'#0d9488'
-  });
-  if (!c.isConfirmed) return;
-  const { error: e1 } = await sb.from('lost_history').insert({
-    school: r.school, zone: r.zone, model: r.model, imei: r.imei, phone: r.phone, note: r.note,
-    recorder: r.recorder, status: r.status, lost_status: r.lost_status, link: r.link,
-    lost_at: new Date(r.lostAt).toISOString()
-  });
-  if (e1) return fail('ย้ายไปประวัติไม่สำเร็จ: ' + e1.message);
-  const { error: e2 } = await sb.from('lost_records').delete().eq('id', id);
-  if (e2) return fail('ลบรายการเดิมไม่สำเร็จ: ' + e2.message);
-  ok('Finish เรียบร้อย ย้ายไปประวัติแล้ว'); loadData();
-}
-async function removeRecord(id){
-  const c = await Swal.fire({
-    title:'ลบรายการนี้?', text:'ลบแล้วกู้คืนไม่ได้', icon:'warning', showCancelButton:true,
-    confirmButtonText:'ลบเลย', cancelButtonText:'ยกเลิก', confirmButtonColor:'#dc2626'
-  });
-  if (!c.isConfirmed) return;
-  const { error } = await sb.from('lost_records').delete().eq('id', id);
-  if (error) return fail('ลบไม่สำเร็จ: ' + error.message);
-  ok('ลบรายการแล้ว'); loadData();
-}
-function exportCSV(){
-  const list = view === 'history' ? history : filtered();
-  const head = ['ชื่อโรงเรียน','Zone','รุ่น','SN/IMEI','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะปัจจุบัน','Lost Mode','ลิงก์พิกัด','หมายเหตุ','ผู้บันทึก'];
-  const rows = list.map(r => [
-    r.school, 'Zone '+r.zone, r.model, r.imei, r.phone, fmtDate(r.lostAt),
-    r.status === 'online' ? 'Online' : 'Offline', LOST_LABEL[r.lost_status], r.link, r.note, r.recorder
-  ]);
-  const csv = [head, ...rows].map(row => row.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = `lostmode_${view}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  ok('ดาวน์โหลด CSV แล้ว');
-}
-
-document.querySelectorAll('.kpi').forEach(el => el.addEventListener('click', () => {
-  kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
-  render();
-}));
-['search','dFrom','dTo','fZone','fStatus','fLost'].forEach(id => $(id).addEventListener('input', render));
-$('btnClear').addEventListener('click', () => {
-  ['search','dFrom','dTo'].forEach(id => $(id).value = '');
-  ['fZone','fStatus','fLost'].forEach(id => $(id).value = 'all');
-  kpiFilter = null; render();
-});
-document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-  if (e.target === m) m.classList.remove('show');
-}));
-
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) showApp(); else { document.body.classList.add('login-bg'); $('login').classList.remove('hidden'); }
-})();
-</script>
-</body>
-</html>
