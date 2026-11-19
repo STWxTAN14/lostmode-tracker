@@ -8,14 +8,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
 <style>
 :root{
-  --teal:#0d9488;--cyan:#06b6d4;--blue:#2563eb;--navy:#0c4a6e;
-  --bg:#ecfdf5;--surface:#ffffff;--text:#0f172a;--muted:#64748b;--border:#d1fae5;
+  --teal:#0d9488;--cyan:#0891b2;--blue:#2563eb;--navy:#0c4a6e;
+  --surface:#ffffff;--text:#0f172a;--muted:#64748b;--border:#d1fae5;
   --input:#a7f3d0;--ghost:#e0f2fe;--ghost-text:#0c4a6e;
   --shadow:0 2px 6px rgba(6,95,70,.08),0 10px 30px rgba(8,145,178,.10);
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);font-size:15px;line-height:1.5;min-height:100vh;
+html,body{min-height:100%}
+body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);font-size:15px;line-height:1.5;
   background:linear-gradient(160deg,#ecfdf5 0%,#e0f7fa 50%,#e0ecff 100%);background-attachment:fixed}
+body.login-bg{background:url('opengraph.jpg') center/cover fixed no-repeat #0c4a6e}
+body.app-bg::before{content:"";position:fixed;inset:0;background:url('img-1.webp') center/cover no-repeat;z-index:-2}
+body.app-bg::after{content:"";position:fixed;inset:0;background:linear-gradient(160deg,rgba(236,253,245,.90) 0%,rgba(224,247,250,.90) 50%,rgba(224,236,255,.90) 100%);z-index:-1}
 header{background:linear-gradient(120deg,#0d9488 0%,#0891b2 50%,#2563eb 100%);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 8px 24px rgba(8,145,178,.35);position:relative;overflow:hidden}
 header::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -20%,rgba(255,255,255,.25),transparent 45%);pointer-events:none}
 header h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.2px}
@@ -23,7 +27,7 @@ header .sub{font-size:12px;opacity:.9}
 main{padding:24px;max-width:1320px;margin:0 auto;animation:fadeUp .5s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
-.tabs{display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,.7);padding:6px;border-radius:14px;width:fit-content;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;background:rgba(255,255,255,.75);padding:6px;border-radius:14px;width:fit-content;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
 .tab{background:transparent;color:var(--navy);padding:9px 18px}
 .tab.on{background:linear-gradient(120deg,#0d9488,#2563eb);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.3)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:18px}
@@ -39,7 +43,7 @@ main{padding:24px;max-width:1320px;margin:0 auto;animation:fadeUp .5s ease both}
 .c-orange{--c1:#f59e0b;--c2:#ea580c}
 .c-green{--c1:#10b981;--c2:#0d9488}
 .c-red{--c1:#f43f5e;--c2:#db2777}
-.card{background:var(--surface);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
+.card{background:rgba(255,255,255,.94);border-radius:16px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:18px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .grow{flex:1;min-width:240px}
 input,select,textarea{padding:10px 12px;border:1px solid var(--input);border-radius:10px;font:inherit;background:#fff;color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
@@ -80,16 +84,16 @@ a.link{color:#0891b2;font-weight:600;text-decoration:none}
 a.link:hover{text-decoration:underline}
 .btns{display:flex;gap:6px;flex-wrap:wrap}
 #login{max-width:400px;margin:70px auto;padding:0 16px;animation:pop .5s ease}
-#login .card{padding:28px}
+#login .card{padding:28px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}}
 </style>
 </head>
-<body>
-<header>
+<body class="login-bg">
+<header id="hdr">
   <div>
-    <h1> Supreme Lost Mode Tracking</h1>
+    <h1>📱 Supreme Lost Mode Tracking</h1>
     <div class="sub">ระบบติดตามเครื่องสำหรับโรงเรียน</div>
   </div>
   <button class="ghost hidden" id="btnLogout" onclick="logout()">ออกจากระบบ</button>
@@ -124,8 +128,7 @@ a.link:hover{text-decoration:underline}
       <input type="date" id="dTo" title="ถึงวันที่">
       <select id="fZone">
         <option value="all">Zone: ทั้งหมด</option>
-        <option value="1">Zone 1</option><option value="2">Zone 2</option>
-        <option value="3">Zone 3</option><option value="4">Zone 4</option>
+        <option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option>
       </select>
       <select id="fStatus">
         <option value="all">สถานะ MDM: ทั้งหมด</option>
@@ -166,7 +169,7 @@ a.link:hover{text-decoration:underline}
     <div class="grid2">
       <div class="field">ชื่อโรงเรียน<input id="aSchool"></div>
       <div class="field">Zone
-        <select id="aZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></select>
+        <select id="aZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option></select>
       </div>
       <div class="field">รุ่นเครื่อง<input id="aModel" value="Apple Gen 11" readonly></div>
       <div class="field">SN / IMEI<input id="aImei"></div>
@@ -198,7 +201,7 @@ a.link:hover{text-decoration:underline}
         <select id="uLost"><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sending">กำลังส่ง</option><option value="sent">ส่งแล้ว</option></select>
       </div>
       <div class="field">Zone
-        <select id="uZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option><option value="4">Zone 4</option></select>
+        <select id="uZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option></select>
       </div>
       <div class="field">สถานะพิกัด
         <select id="uLoc"><option value="no">รออัปเดตพิกัด</option><option value="yes">พบพิกัดแล้ว</option></select>
@@ -220,11 +223,9 @@ const SUPABASE_URL = 'https://tpknvimfglagybnxxqnl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JAHEFk9X5PE7qrt23xOFLw_Usn80YBA';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const Toast = Swal.mixin({
-  toast: true, position: 'top-end', showConfirmButton: false, timer: 2200, timerProgressBar: true
-});
+const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2200, timerProgressBar: true });
 function ok(msg){ Toast.fire({ icon:'success', title: msg }); }
-function fail(msg){ Swal.fire({ icon:'error', title:'เกิดข้อผิดพลาด', text: msg, confirmButtonText:'ตกลง', confirmButtonColor:'#0d9488', showClass:{popup:'animate__animated animate__shakeX'} }); }
+function fail(msg){ Swal.fire({ icon:'error', title:'เกิดข้อผิดพลาด', text: msg, confirmButtonText:'ตกลง', confirmButtonColor:'#0d9488' }); }
 function warn(msg){ Swal.fire({ icon:'warning', title:'กรุณาตรวจสอบ', text: msg, confirmButtonColor:'#0d9488' }); }
 
 let data = [], history = [];
@@ -368,7 +369,7 @@ function subscribe(){
 
 async function login(){
   const { error } = await sb.auth.signInWithPassword({ email: $('lEmail').value.trim(), password: $('lPass').value });
-  if (error) { fail('เข้าสู่ระบบไม่สำเร็จ: ' + error.message); return; }
+  if (error) return fail('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
   $('lPass').value = '';
   ok('เข้าสู่ระบบสำเร็จ');
   showApp();
@@ -382,6 +383,8 @@ async function showApp(){
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('btnLogout').classList.remove('hidden');
+  document.body.classList.remove('login-bg');
+  document.body.classList.add('app-bg');
   await loadData();
   subscribe();
 }
@@ -411,7 +414,7 @@ function openUpdate(id){
   const r = data.find(x => x.id === id);
   $('uStatus').value = r.status;
   $('uLost').value = r.lost_status;
-  $('uZone').value = r.zone;
+  $('uZone').value = ['1','2','3'].includes(r.zone) ? r.zone : '1';
   $('uLoc').value = r.located;
   $('uLink').value = r.link || '';
   openM('mUpd');
@@ -490,7 +493,7 @@ document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e =
 
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) showApp(); else $('login').classList.remove('hidden');
+  if (session) showApp(); else { document.body.classList.add('login-bg'); $('login').classList.remove('hidden'); }
 })();
 </script>
 </body>
