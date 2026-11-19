@@ -429,3 +429,89 @@ function openMapFromModal(){
 async function saveUpdate(){
   const link = $('uLink').value.trim();
   if (link && !mapUrl(link)) return warn('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง');
+  const located = link ? 'yes' : $('uLoc').value;
+  const { error } = await sb.from('lost_records').update({
+    status: $('uStatus').value, lost_status: $('uLost').value, zone: $('uZone').value, link, located
+  }).eq('id', editingId);
+  if (error) return fail('อัปเดตไม่สำเร็จ: ' + error.message);
+  closeM('mUpd'); ok('อัปเดตเรียบร้อย'); loadData();
+}
+async function finishRecord(id){
+  const r = data.find(x => x.id === id);
+  if (!r) return;
+  const c = await Swal.fire({
+    title:'Finish เครื่องนี้?', html:`<b>${esc(r.school || r.imei)}</b><br>ข้อมูลจะถูกย้ายไปหน้าประวัติ`,
+    icon:'question', showCancelButton:true, confirmButtonText:'ใช่, Finish', cancelButtonText:'ยกเลิก', confirmButtonColor:'#0d9488'
+  });
+  if (!c.isConfirmed) return;
+  const { error: e1 } = await sb.from('lost_history').insert({
+    school: r.school, zone: r.zone, model: r.model, imei: r.imei, phone: r.phone, note: r.note,
+    recorder: r.recorder, status: r.status, lost_status: r.lost_status, link: r.link,
+    lost_at: new Date(r.lostAt).toISOString()
+  });
+  if (e1) return fail('ย้ายไปประวัติไม่สำเร็จ: ' + e1.message);
+  const { error: e2 } = await sb.from('lost_records').delete().eq('id', id);
+  if (e2) return fail('ลบรายการเดิมไม่สำเร็จ: ' + e2.message);
+  ok('Finish เรียบร้อย ย้ายไปประวัติแล้ว'); loadData();
+}
+async function removeRecord(id){
+  const c = await Swal.fire({
+    title:'ลบรายการนี้?', text:'ลบแล้วกู้คืนไม่ได้', icon:'warning', showCancelButton:true,
+    confirmButtonText:'ลบเลย', cancelButtonText:'ยกเลิก', confirmButtonColor:'#dc2626'
+  });
+  if (!c.isConfirmed) return;
+  const { error } = await sb.from('lost_records').delete().eq('id', id);
+  if (error) return fail('ลบไม่สำเร็จ: ' + error.message);
+  ok('ลบรายการแล้ว'); loadData();
+}
+async function removeHistory(id){
+  const r = history.find(x => x.id === id);
+  if (!r) return;
+  const c = await Swal.fire({
+    title:'แน่ใจนะที่จะลบ?',
+    html:`<b>${esc(r.school || r.imei)}</b><br><span style="color:#dc2626">ข้อมูลในประวัติรายการนี้จะถูกลบถาวร และกู้คืนไม่ได้</span>`,
+    icon:'warning', showCancelButton:true, reverseButtons:true,
+    confirmButtonText:'ใช่ ลบเลย', cancelButtonText:'ยกเลิก',
+    confirmButtonColor:'#dc2626', cancelButtonColor:'#0d9488', focusCancel:true
+  });
+  if (!c.isConfirmed) return;
+  const { error } = await sb.from('lost_history').delete().eq('id', id);
+  if (error) return fail('ลบจากประวัติไม่สำเร็จ: ' + error.message);
+  ok('ลบออกจากประวัติแล้ว'); loadData();
+}
+function exportCSV(){
+  const list = view === 'history' ? history : filtered();
+  const head = ['ชื่อโรงเรียน','Zone','รุ่น','SN/IMEI','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะปัจจุบัน','Lost Mode','ลิงก์พิกัด','หมายเหตุ','ผู้บันทึก'];
+  const rows = list.map(r => [
+    r.school, 'Zone '+r.zone, r.model, r.imei, r.phone, fmtDate(r.lostAt),
+    r.status === 'online' ? 'Online' : 'Offline', LOST_LABEL[r.lost_status], r.link, r.note, r.recorder
+  ]);
+  const csv = [head, ...rows].map(row => row.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `lostmode_${view}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  ok('ดาวน์โหลด CSV แล้ว');
+}
+
+document.querySelectorAll('.kpi').forEach(el => el.addEventListener('click', () => {
+  kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
+  render();
+}));
+['search','dFrom','dTo','fZone','fStatus','fLost'].forEach(id => $(id).addEventListener('input', render));
+$('btnClear').addEventListener('click', () => {
+  ['search','dFrom','dTo'].forEach(id => $(id).value = '');
+  ['fZone','fStatus','fLost'].forEach(id => $(id).value = 'all');
+  kpiFilter = null; render();
+});
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
+  if (e.target === m) m.classList.remove('show');
+}));
+
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) showApp(); else { document.body.classList.add('login-bg'); $('login').classList.remove('hidden'); }
+})();
+</script>
+</body>
+</html>
