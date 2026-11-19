@@ -8,6 +8,7 @@
 <link rel="apple-touch-icon" href="opengraph.jpg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
 <style>
 :root{
   --navy:#0c4a6e;--text:#0f172a;--muted:#64748b;--border:#d1fae5;
@@ -19,7 +20,7 @@ html,body{min-height:100%}
 body{margin:0;font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);font-size:15px;line-height:1.5;
   background:linear-gradient(160deg,#ecfdf5 0%,#e0f7fa 50%,#e0ecff 100%);background-attachment:fixed}
 body.login-bg{background:#0c4a6e url('On-dis.jpg') center center/cover fixed no-repeat}
-body.app-bg::before{content:"";position:fixed;inset:0;background:url('PP22.png') center/cover no-repeat;z-index:-2}
+body.app-bg::before{content:"";position:fixed;inset:0;background:url('SICCC.jpg') center/cover no-repeat;z-index:-2}
 body.app-bg::after{content:"";position:fixed;inset:0;background:linear-gradient(160deg,rgba(236,253,245,.20) 0%,rgba(224,247,250,.20) 50%,rgba(224,236,255,.20) 100%);z-index:-1}
 
 header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -99,6 +100,8 @@ a.link:hover{text-decoration:underline}
 #login button.login-btn{width:100%;margin-top:20px;padding:13px;font-size:16px;border-radius:12px;background:linear-gradient(120deg,#0d9488,#0891b2 50%,#2563eb);box-shadow:0 10px 24px rgba(8,145,178,.4)}
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626}
+.swal2-popup{border-radius:20px !important}
+.swal2-title{font-weight:800 !important;color:#0c4a6e !important}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}}
 </style>
 </head>
@@ -187,7 +190,7 @@ a.link:hover{text-decoration:underline}
       <div class="field">Zone
         <select id="aZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option></select>
       </div>
-      <div class="field">รุ่นเครื่อง<input id="aModel" value="Apple Gen 11" readonly></div>
+      <div class="field">รุ่นเครื่อง<input id="aModel" value="iPad (A16)" readonly></div>
       <div class="field">SN / IMEI<input id="aImei"></div>
       <div class="field">เบอร์ติดต่อ<input id="aPhone"></div>
       <div class="field">ผู้บันทึก (พิมพ์ชื่อตัวเอง)<input id="aRecorder"></div>
@@ -239,10 +242,24 @@ const SUPABASE_URL = 'https://tpknvimfglagybnxxqnl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JAHEFk9X5PE7qrt23xOFLw_Usn80YBA';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2200, timerProgressBar: true });
+/* ---------- SweetAlert2 แบบมี Animation ---------- */
+const SWAL_BASE = {
+  confirmButtonColor:'#0d9488', cancelButtonColor:'#64748b',
+  showClass:{ popup:'animate__animated animate__zoomIn animate__faster' },
+  hideClass:{ popup:'animate__animated animate__zoomOut animate__faster' },
+  background:'#ffffff', backdrop:'rgba(12,74,110,.45)'
+};
+const Toast = Swal.mixin({
+  toast:true, position:'top-end', showConfirmButton:false, timer:2200, timerProgressBar:true,
+  showClass:{ popup:'animate__animated animate__fadeInRight animate__faster' },
+  hideClass:{ popup:'animate__animated animate__fadeOutRight animate__faster' }
+});
 function ok(msg){ Toast.fire({ icon:'success', title: msg }); }
-function fail(msg){ Swal.fire({ icon:'error', title:'เกิดข้อผิดพลาด', text: msg, confirmButtonText:'ตกลง', confirmButtonColor:'#0d9488' }); }
-function warn(msg){ Swal.fire({ icon:'warning', title:'กรุณาตรวจสอบ', text: msg, confirmButtonColor:'#0d9488' }); }
+function fail(msg){ Swal.fire({ ...SWAL_BASE, icon:'error', title:'เกิดข้อผิดพลาด', text: msg, confirmButtonText:'ตกลง',
+  showClass:{ popup:'animate__animated animate__shakeX' } }); }
+function warn(msg){ Swal.fire({ ...SWAL_BASE, icon:'warning', title:'กรุณาตรวจสอบ', text: msg, confirmButtonText:'ตกลง' }); }
+function confirmBox(opts){ return Swal.fire({ ...SWAL_BASE, icon:'question', showCancelButton:true, reverseButtons:true,
+  cancelButtonText:'ยกเลิก', ...opts }); }
 
 let data = [], history = [];
 let view = 'main', kpiFilter = null, editingId = null;
@@ -393,7 +410,7 @@ async function login(){
   showApp();
 }
 async function logout(){
-  const r = await Swal.fire({ title:'ออกจากระบบ?', icon:'question', showCancelButton:true, confirmButtonText:'ออกจากระบบ', cancelButtonText:'ยกเลิก', confirmButtonColor:'#0d9488' });
+  const r = await confirmBox({ title:'ออกจากระบบ?', confirmButtonText:'ออกจากระบบ' });
   if (!r.isConfirmed) return;
   await sb.auth.signOut(); location.reload();
 }
@@ -419,7 +436,7 @@ async function addRecord(){
   if (!school && !imei) return warn('กรุณากรอกชื่อโรงเรียนหรือ SN');
   if (!recorder) return warn('กรุณาพิมพ์ชื่อผู้บันทึก');
   const { error } = await sb.from('lost_records').insert({
-    school, zone: $('aZone').value, model: 'Apple Gen 11', imei,
+    school, zone: $('aZone').value, model: 'iPad (A16)', imei,
     phone: $('aPhone').value.trim(), note: $('aNote').value.trim(), recorder,
     status: $('aStatus').value, lost_status: $('aLost').value, located: 'no', link: '',
     lost_at: new Date().toISOString()
@@ -455,10 +472,7 @@ async function saveUpdate(){
 async function finishRecord(id){
   const r = data.find(x => x.id === id);
   if (!r) return;
-  const c = await Swal.fire({
-    title:'Finish เครื่องนี้?', html:`<b>${esc(r.school || r.imei)}</b><br>ข้อมูลจะถูกย้ายไปหน้าประวัติ`,
-    icon:'question', showCancelButton:true, confirmButtonText:'ใช่, Finish', cancelButtonText:'ยกเลิก', confirmButtonColor:'#0d9488'
-  });
+  const c = await confirmBox({ title:'Finish เครื่องนี้?', html:`<b>${esc(r.school || r.imei)}</b><br>ข้อมูลจะถูกย้ายไปหน้าประวัติ`, confirmButtonText:'ใช่, Finish' });
   if (!c.isConfirmed) return;
   const { error: e1 } = await sb.from('lost_history').insert({
     school: r.school, zone: r.zone, model: r.model, imei: r.imei, phone: r.phone, note: r.note,
@@ -471,10 +485,8 @@ async function finishRecord(id){
   ok('Finish เรียบร้อย ย้ายไปประวัติแล้ว'); loadData();
 }
 async function removeRecord(id){
-  const c = await Swal.fire({
-    title:'ลบรายการนี้?', text:'ลบแล้วกู้คืนไม่ได้', icon:'warning', showCancelButton:true,
-    confirmButtonText:'ลบเลย', cancelButtonText:'ยกเลิก', confirmButtonColor:'#dc2626'
-  });
+  const c = await Swal.fire({ ...SWAL_BASE, title:'ลบรายการนี้?', text:'ลบแล้วกู้คืนไม่ได้', icon:'warning',
+    showCancelButton:true, reverseButtons:true, confirmButtonText:'ลบเลย', cancelButtonText:'ยกเลิก', confirmButtonColor:'#dc2626' });
   if (!c.isConfirmed) return;
   const { error } = await sb.from('lost_records').delete().eq('id', id);
   if (error) return fail('ลบไม่สำเร็จ: ' + error.message);
@@ -483,13 +495,12 @@ async function removeRecord(id){
 async function removeHistory(id){
   const r = history.find(x => x.id === id);
   if (!r) return;
-  const c = await Swal.fire({
+  const c = await Swal.fire({ ...SWAL_BASE,
     title:'แน่ใจนะที่จะลบ?',
     html:`<b>${esc(r.school || r.imei)}</b><br><span style="color:#dc2626">ข้อมูลในประวัติรายการนี้จะถูกลบถาวร และกู้คืนไม่ได้</span>`,
     icon:'warning', showCancelButton:true, reverseButtons:true,
-    confirmButtonText:'ใช่ ลบเลย', cancelButtonText:'ยกเลิก',
-    confirmButtonColor:'#dc2626', cancelButtonColor:'#0d9488', focusCancel:true
-  });
+    confirmButtonText:'ใช่ ลบเลย', cancelButtonText:'ยกเลิก', cancelButtonColor:'#0d9488',
+    confirmButtonColor:'#dc2626', focusCancel:true });
   if (!c.isConfirmed) return;
   const { error } = await sb.from('lost_history').delete().eq('id', id);
   if (error) return fail('ลบจากประวัติไม่สำเร็จ: ' + error.message);
