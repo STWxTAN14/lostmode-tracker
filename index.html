@@ -119,7 +119,6 @@ select:disabled{opacity:.55}
 input[type=date]{min-width:150px;color-scheme:inherit}
 option{background:var(--surface);color:var(--ink)}
 
-/* ---------- ปุ่ม (รองรับ Magnetic) ---------- */
 button{position:relative;overflow:hidden;padding:10px 18px;border:0;border-radius:12px;background:var(--grad);background-size:200% 100%;color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),box-shadow .2s,background-position .4s;box-shadow:0 6px 16px rgba(37,99,235,.25);will-change:transform}
 button:hover{background-position:100% 0;box-shadow:0 10px 24px rgba(37,99,235,.32)}
 button:active{transform:scale(.97)!important}
@@ -168,7 +167,6 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 .empty .ico{font-size:44px;display:block;margin-bottom:8px}
 .empty b{display:block;color:var(--heading);font-size:15px;margin-bottom:4px}
 
-/* ---------- แผนที่ + กราฟ ---------- */
 .view-block{display:block}
 .view-block.hidden{display:none !important}
 #mapBox{height:460px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--surface)}
@@ -180,6 +178,7 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--modal-bg);color:var(--ink)}
 .leaflet-container{font-family:inherit}
 .map-sum{margin:0 0 12px;color:var(--muted);font-size:13px;font-weight:600}
+.map-pin{cursor:pointer}
 
 .modal{position:fixed;inset:0;background:var(--overlay);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal.show{display:flex;animation:fadeUp .25s ease}
@@ -195,7 +194,6 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 a.link{color:#0891b2;font-weight:700;text-decoration:none}
 a.link:hover{text-decoration:underline}
 
-/* ---------- Login ---------- */
 @keyframes loginFloat{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-12px) rotateX(2deg)}}
 @keyframes loginIn{0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(18deg)}60%{opacity:1;transform:translateY(-8px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:none}}
 @keyframes borderSpin{0%{--ang:0deg}100%{--ang:360deg}}
@@ -447,7 +445,7 @@ if (window.matchMedia) {
   }
 })();
 
-/* ---------- Confetti (Canvas ในตัว) ---------- */
+/* ---------- Confetti ---------- */
 const cvs = document.getElementById('confettiCanvas');
 const ctx = cvs.getContext('2d');
 let confetti = [], confettiRunning = false;
@@ -459,14 +457,10 @@ function burstConfetti(kind){
   const count = kind === 'star' ? 90 : 130;
   for (let i = 0; i < count; i++) {
     confetti.push({
-      x: innerWidth / 2 + (Math.random() - .5) * 200,
-      y: innerHeight * 0.35,
-      vx: (Math.random() - .5) * 12,
-      vy: -Math.random() * 14 - 4,
-      g: .32 + Math.random() * .12,
-      s: 6 + Math.random() * 8,
-      r: Math.random() * 360,
-      vr: (Math.random() - .5) * 14,
+      x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * 0.35,
+      vx: (Math.random() - .5) * 12, vy: -Math.random() * 14 - 4,
+      g: .32 + Math.random() * .12, s: 6 + Math.random() * 8,
+      r: Math.random() * 360, vr: (Math.random() - .5) * 14,
       c: colors[Math.floor(Math.random() * colors.length)],
       star: kind === 'star' || Math.random() < .35,
       life: 150 + Math.random() * 60
@@ -477,8 +471,7 @@ function burstConfetti(kind){
 function drawStar(x, y, r){
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
-    const rad = i % 2 ? r * .45 : r;
-    const a = Math.PI / 5 * i;
+    const rad = i % 2 ? r * .45 : r, a = Math.PI / 5 * i;
     ctx.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
   }
   ctx.closePath(); ctx.fill();
@@ -490,8 +483,7 @@ function tickConfetti(){
     p.vy += p.g; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r * Math.PI / 180);
     ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life / 40);
-    if (p.star) drawStar(0, 0, p.s / 1.4);
-    else ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+    if (p.star) drawStar(0, 0, p.s / 1.4); else ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
     ctx.restore();
   }
   if (confetti.length) requestAnimationFrame(tickConfetti);
@@ -576,7 +568,7 @@ function mapUrl(v){
   const m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
   return m ? `https://www.google.com/maps?q=${m[1]},${m[2]}` : '';
 }
-/* ดึงพิกัด lat,lng จากลิงก์ (รองรับทั้งแบบ "lat,lng" และ Google Maps URL ที่มี q=) */
+/* ดึงพิกัด [lat,lng] จากลิงก์ (รองรับ "lat,lng" และ Google Maps URL ที่มี q= / ll= / query=) */
 function parseLatLng(v){
   if (!v) return null;
   let m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
@@ -584,6 +576,10 @@ function parseLatLng(v){
   m = v.match(/[?&](?:q|ll|query)=(-?\d+(?:\.\d+)?)[,%2C]+(-?\d+(?:\.\d+)?)/i);
   if (m) return [+m[1], +m[2]];
   return null;
+}
+/* เปิด Google Maps ตามพิกัด */
+function googleMapsLatLng(ll){
+  return `https://www.google.com/maps/search/?api=1&query=${ll[0]},${ll[1]}`;
 }
 const LOST_LABEL = {not_sent:'ยังไม่ได้ส่ง', sending:'กำลังส่ง', sent:'ส่งแล้ว'};
 const LOST_CLASS = {not_sent:'b-notsent', sending:'b-sending', sent:'b-sent'};
@@ -687,19 +683,22 @@ function chartColors(){
 }
 function renderMap(){
   const pts = data.map(r => ({ r, ll: parseLatLng(r.link) })).filter(x => x.ll);
-  $('mapSum').textContent = `มีพิกัด ${pts.length} จาก ${data.length} เครื่อง`;
+  $('mapSum').textContent = `มีพิกัด ${pts.length} จาก ${data.length} เครื่อง (คลิกหมุดเพื่อเปิด Google Maps)`;
   if (!leafMap) {
     leafMap = L.map('mapBox', { zoomControl: true }).setView([13.75, 100.5], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '&copy; OpenStreetMap'
-    }).addTo(leafMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(leafMap);
   }
   if (mapLayer) mapLayer.clearLayers(); else mapLayer = L.layerGroup().addTo(leafMap);
   const bounds = [];
   pts.forEach(({ r, ll }) => {
-    const m = L.circleMarker(ll, { radius: 8, color:'#fff', weight:2, fillColor: r.lost_status==='sent' ? '#10b981' : r.lost_status==='sending' ? '#f59e0b' : '#f43f5e', fillOpacity:.95 });
-    m.bindPopup(`<b>${esc(r.school)}</b><br>${esc(r.province)} · Zone ${esc(r.zone)}<br>${esc(r.imei)}<br>${LOST_LABEL[r.lost_status]}<br><a href="https://www.google.com/maps?q=${ll[0]},${ll[1]}" target="_blank" rel="noopener">เปิดใน Google Maps</a>`);
-    m.addTo(mapLayer); bounds.push(ll);
+    const color = r.lost_status === 'sent' ? '#10b981' : r.lost_status === 'sending' ? '#f59e0b' : '#f43f5e';
+    const m = L.circleMarker(ll, { radius: 9, color:'#fff', weight:2, fillColor: color, fillOpacity:.95, className:'map-pin' });
+    /* tooltip แสดงเมื่อเอาเมาส์ชี้ */
+    m.bindTooltip(`<b>${esc(r.school)}</b><br>${esc(r.province)} · Zone ${esc(r.zone)}`, { direction:'top', offset:[0,-8], sticky:true });
+    /* คลิกหมุดแล้วเปิด Google Maps ทันที */
+    m.on('click', () => window.open(googleMapsLatLng(ll), '_blank', 'noopener'));
+    m.addTo(mapLayer);
+    bounds.push(ll);
   });
   if (bounds.length) leafMap.fitBounds(bounds, { padding:[30,30], maxZoom:12 });
   setTimeout(() => leafMap.invalidateSize(), 150);
@@ -711,20 +710,17 @@ function renderCharts(){
   const byProv = {};
   data.forEach(r => { const p = r.province || 'ไม่ระบุ'; byProv[p] = (byProv[p] || 0) + 1; });
   const provs = Object.entries(byProv).sort((a,b) => b[1]-a[1]);
-
   if (chartZone) chartZone.destroy();
   chartZone = new Chart($('chartZone'), {
     type:'bar',
-    data:{ labels:['Zone 1','Zone 2','Zone 3'], datasets:[{ label:'จำนวนเครื่อง', data:zc,
-      backgroundColor:['#06b6d4','#2563eb','#10b981'], borderRadius:10 }] },
+    data:{ labels:['Zone 1','Zone 2','Zone 3'], datasets:[{ label:'จำนวนเครื่อง', data:zc, backgroundColor:['#06b6d4','#2563eb','#10b981'], borderRadius:10 }] },
     options:{ responsive:true, plugins:{ legend:{ display:false } },
       scales:{ x:{ ticks:{color:c.text}, grid:{color:c.grid} }, y:{ beginAtZero:true, ticks:{ precision:0, color:c.text }, grid:{color:c.grid} } } }
   });
   if (chartProv) chartProv.destroy();
   chartProv = new Chart($('chartProv'), {
     type:'bar',
-    data:{ labels: provs.map(p=>p[0]), datasets:[{ label:'จำนวนเครื่อง', data: provs.map(p=>p[1]),
-      backgroundColor:'rgba(37,99,235,.75)', borderRadius:8 }] },
+    data:{ labels: provs.map(p=>p[0]), datasets:[{ label:'จำนวนเครื่อง', data: provs.map(p=>p[1]), backgroundColor:'rgba(37,99,235,.75)', borderRadius:8 }] },
     options:{ indexAxis:'y', responsive:true, plugins:{ legend:{ display:false } },
       scales:{ x:{ beginAtZero:true, ticks:{ precision:0, color:c.text }, grid:{color:c.grid} }, y:{ ticks:{color:c.text}, grid:{display:false} } } }
   });
