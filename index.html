@@ -57,6 +57,7 @@ main{padding:24px;max-width:1360px;margin:0 auto;animation:fadeUp .5s ease both}
 input,select,textarea{padding:10px 12px;border:1px solid var(--input);border-radius:10px;font:inherit;background:#fff;color:var(--text);outline:none;transition:border .2s,box-shadow .2s}
 input:focus,select:focus,textarea:focus{border-color:#0891b2;box-shadow:0 0 0 4px rgba(8,145,178,.15)}
 input[type=search]{width:100%}
+select:disabled{background:#f1f5f9;color:#94a3b8}
 button{padding:10px 16px;border:0;border-radius:10px;background:linear-gradient(120deg,#0d9488,#2563eb);color:#fff;font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .15s,filter .15s;box-shadow:0 4px 12px rgba(37,99,235,.2)}
 button:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 8px 18px rgba(37,99,235,.28)}
 button:active{transform:scale(.97)}
@@ -188,8 +189,12 @@ a.link:hover{text-decoration:underline}
     <h3>✨ เพิ่มรายการ Lost Mode</h3>
     <div class="grid2">
       <div class="field">ชื่อโรงเรียน<input id="aSchool"></div>
-      <div class="field">จังหวัด<input id="aProvince" list="provList" placeholder="เช่น กรุงเทพมหานคร"></div>
-      <div class="field">สพม./สพป.<input id="aOffice" list="officeList" placeholder="เช่น สพม.1 หรือ สพป.นนทบุรี เขต 1"></div>
+      <div class="field">จังหวัด
+        <select id="aProvince"><option value="">-- เลือกจังหวัด --</option></select>
+      </div>
+      <div class="field full">สพม./สพป.
+        <select id="aOffice" disabled><option value="">-- เลือกจังหวัดก่อน --</option></select>
+      </div>
       <div class="field">Zone
         <select id="aZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option></select>
       </div>
@@ -217,8 +222,12 @@ a.link:hover{text-decoration:underline}
     <h3>🛠 แก้ไข / อัปเดตรายการ</h3>
     <div class="grid2">
       <div class="field full">ชื่อโรงเรียน<input id="eSchool"></div>
-      <div class="field">จังหวัด<input id="eProvince" list="provList"></div>
-      <div class="field">สพม./สพป.<input id="eOffice" list="officeList"></div>
+      <div class="field">จังหวัด
+        <select id="eProvince"></select>
+      </div>
+      <div class="field">สพม./สพป.
+        <select id="eOffice"></select>
+      </div>
       <div class="field">สถานะเครื่อง (MDM)
         <select id="uStatus"><option value="online">Online</option><option value="offline">Offline</option></select>
       </div>
@@ -243,24 +252,6 @@ a.link:hover{text-decoration:underline}
   </div>
 </div>
 
-<datalist id="provList"></datalist>
-<datalist id="officeList">
-  <option value="สพม.1"></option><option value="สพม.2"></option><option value="สพม.3"></option>
-  <option value="สพม.4"></option><option value="สพม.5"></option><option value="สพม.6"></option>
-  <option value="สพม.7"></option><option value="สพม.8"></option><option value="สพม.9"></option>
-  <option value="สพม.10"></option><option value="สพม.11"></option><option value="สพม.12"></option>
-  <option value="สพม.13"></option><option value="สพม.14"></option><option value="สพม.15"></option>
-  <option value="สพม.16"></option><option value="สพม.17"></option><option value="สพม.18"></option>
-  <option value="สพม.19"></option><option value="สพม.20"></option><option value="สพม.21"></option>
-  <option value="สพม.22"></option><option value="สพม.23"></option><option value="สพม.24"></option>
-  <option value="สพม.25"></option><option value="สพม.26"></option><option value="สพม.27"></option>
-  <option value="สพม.28"></option><option value="สพม.29"></option><option value="สพม.30"></option>
-  <option value="สพม.31"></option><option value="สพม.32"></option><option value="สพม.33"></option>
-  <option value="สพม.34"></option><option value="สพม.35"></option><option value="สพม.36"></option>
-  <option value="สพม.37"></option><option value="สพม.38"></option><option value="สพม.39"></option>
-  <option value="สพม.40"></option><option value="สพม.41"></option><option value="สพม.42"></option>
-</datalist>
-
 <script>
 const SUPABASE_URL = 'https://tpknvimfglagybnxxqnl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JAHEFk9X5PE7qrt23xOFLw_Usn80YBA';
@@ -268,9 +259,39 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 });
 
-const PROVINCES = ['กรุงเทพมหานคร','กระบี่','กาญจนบุรี','กาฬสินธุ์','กำแพงเพชร','ขอนแก่น','จันทบุรี','ฉะเชิงเทรา','ชลบุรี','ชัยนาท','ชัยภูมิ','ชุมพร','เชียงราย','เชียงใหม่','ตรัง','ตราด','ตาก','นครนายก','นครปฐม','นครพนม','นครราชสีมา','นครศรีธรรมราช','นครสวรรค์','นนทบุรี','นราธิวาส','น่าน','บึงกาฬ','บุรีรัมย์','ปทุมธานี','ประจวบคีรีขันธ์','ปราจีนบุรี','ปัตตานี','พระนครศรีอยุธยา','พะเยา','พังงา','พัทลุง','พิจิตร','พิษณุโลก','เพชรบุรี','เพชรบูรณ์','แพร่','ภูเก็ต','มหาสารคาม','มุกดาหาร','แม่ฮ่องสอน','ยโสธร','ยะลา','ร้อยเอ็ด','ระนอง','ระยอง','ราชบุรี','ลพบุรี','ลำปาง','ลำพูน','เลย','ศรีสะเกษ','สกลนคร','สงขลา','สตูล','สมุทรปราการ','สมุทรสงคราม','สมุทรสาคร','สระแก้ว','สระบุรี','สิงห์บุรี','สุโขทัย','สุพรรณบุรี','สุราษฎร์ธานี','สุรินทร์','หนองคาย','หนองบัวลำภู','อยุธยา','อ่างทอง','อำนาจเจริญ','อุดรธานี','อุตรดิตถ์','อุทัยธานี','อุบลราชธานี'];
-document.getElementById('provList').innerHTML = PROVINCES.map(p => `<option value="${p}"></option>`).join('');
+/* ---------- ข้อมูลอ้างอิงจากตาราง ref_offices (คอลัมน์: จังหวัด, เขต) ---------- */
+let REF = [];            // [{ province, office }]
+let PROVINCES = [];      // รายชื่อจังหวัดไม่ซ้ำ เรียงตามตัวอักษร
 
+async function loadRef(){
+  const { data: rows, error } = await sb.from('ref_offices').select('จังหวัด,เขต').limit(5000);
+  if (error) { console.warn('โหลด ref_offices ไม่สำเร็จ', error.message); return; }
+  REF = rows.filter(r => r['จังหวัด'] && r['เขต'])
+            .map(r => ({ province: String(r['จังหวัด']).trim(), office: String(r['เขต']).trim() }));
+  PROVINCES = [...new Set(REF.map(r => r.province))].sort((a,b) => a.localeCompare(b, 'th'));
+}
+function fillProvinceSelect(sel, selected){
+  sel.innerHTML = '<option value="">-- เลือกจังหวัด --</option>' +
+    PROVINCES.map(p => `<option value="${esc(p)}" ${p===selected?'selected':''}>${esc(p)}</option>`).join('');
+}
+function officesOf(province){
+  return [...new Set(REF.filter(r => r.province === province).map(r => r.office))]
+    .sort((a,b) => a.localeCompare(b, 'th'));
+}
+/* เติมตัวเลือก สพม./สพป. ตามจังหวัด; ถ้าค่าเดิมไม่อยู่ในตาราง ให้แสดงไว้ด้วย */
+function fillOfficeSelect(sel, province, selected){
+  if (!province) {
+    sel.innerHTML = '<option value="">-- เลือกจังหวัดก่อน --</option>';
+    sel.disabled = true; return;
+  }
+  const list = officesOf(province);
+  if (selected && !list.includes(selected)) list.unshift(selected);
+  sel.innerHTML = '<option value="">-- เลือก สพม./สพป. --</option>' +
+    list.map(o => `<option value="${esc(o)}" ${o===selected?'selected':''}>${esc(o)}${REF.some(r=>r.office===o)?'':' (ค่าเดิม)'}</option>`).join('');
+  sel.disabled = false;
+}
+
+/* ---------- SweetAlert2 ---------- */
 const SWAL_BASE = {
   confirmButtonColor:'#0d9488', cancelButtonColor:'#64748b',
   showClass:{ popup:'animate__animated animate__zoomIn animate__faster' },
@@ -462,23 +483,33 @@ async function showApp(){
   $('btnLogout').classList.remove('hidden');
   document.body.classList.remove('login-bg');
   document.body.classList.add('app-bg');
+  await loadRef();
   await loadData();
   subscribe();
 }
 
+/* ---------- เพิ่มรายการ ---------- */
 function openAdd(){
-  ['aSchool','aProvince','aOffice','aImei','aPhone','aNote','aRecorder'].forEach(id => $(id).value = '');
+  ['aSchool','aImei','aPhone','aNote','aRecorder'].forEach(id => $(id).value = '');
   $('aZone').value = '1'; $('aStatus').value = 'online'; $('aLost').value = 'not_sent';
+  fillProvinceSelect($('aProvince'), '');
+  fillOfficeSelect($('aOffice'), '', '');
   openM('mAdd');
 }
+$('aProvince').addEventListener('change', e => fillOfficeSelect($('aOffice'), e.target.value, ''));
+
 async function addRecord(){
   const school = $('aSchool').value.trim();
   const imei = $('aImei').value.trim();
   const recorder = $('aRecorder').value.trim();
+  const province = $('aProvince').value;
+  const office = $('aOffice').value;
   if (!school) return warn('กรุณากรอกชื่อโรงเรียน');
   if (!recorder) return warn('กรุณาพิมพ์ชื่อผู้บันทึก');
+  if (!province) return warn('กรุณาเลือกจังหวัด');
+  if (!office) return warn('กรุณาเลือก สพม./สพป.');
   const { error } = await sb.from('lost_records').insert({
-    school, province: $('aProvince').value.trim(), education_office: $('aOffice').value.trim(),
+    school, province, education_office: office,
     zone: $('aZone').value, model: 'iPad (A16)', imei,
     phone: $('aPhone').value.trim(), note: $('aNote').value.trim(), recorder,
     status: $('aStatus').value, lost_status: $('aLost').value, located: 'no', link: '',
@@ -487,12 +518,17 @@ async function addRecord(){
   if (error) return fail('บันทึกไม่สำเร็จ: ' + error.message);
   closeM('mAdd'); ok('บันทึกรายการเรียบร้อย'); loadData();
 }
+
+/* ---------- แก้ไข ---------- */
 function openUpdate(id){
   editingId = id;
   const r = data.find(x => x.id === id);
   $('eSchool').value = r.school;
-  $('eProvince').value = r.province;
-  $('eOffice').value = r.office;
+  fillProvinceSelect($('eProvince'), r.province);
+  if (r.province && !PROVINCES.includes(r.province)) {
+    $('eProvince').insertAdjacentHTML('beforeend', `<option value="${esc(r.province)}" selected>${esc(r.province)} (ค่าเดิม)</option>`);
+  }
+  fillOfficeSelect($('eOffice'), r.province, r.office);
   $('uStatus').value = r.status;
   $('uLost').value = r.lost_status;
   $('uZone').value = ['1','2','3'].includes(r.zone) ? r.zone : '1';
@@ -500,6 +536,8 @@ function openUpdate(id){
   $('uLink').value = r.link || '';
   openM('mUpd');
 }
+$('eProvince').addEventListener('change', e => fillOfficeSelect($('eOffice'), e.target.value, ''));
+
 function openMapFromModal(){
   const url = mapUrl($('uLink').value.trim());
   if (!url) return warn('ลิงก์หรือพิกัดไม่ถูกต้อง');
@@ -508,16 +546,22 @@ function openMapFromModal(){
 async function saveUpdate(){
   const school = $('eSchool').value.trim();
   if (!school) return warn('ชื่อโรงเรียนห้ามว่าง');
+  const province = $('eProvince').value;
+  const office = $('eOffice').value;
+  if (!province) return warn('กรุณาเลือกจังหวัด');
+  if (!office) return warn('กรุณาเลือก สพม./สพป.');
   const link = $('uLink').value.trim();
   if (link && !mapUrl(link)) return warn('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง');
   const located = link ? 'yes' : $('uLoc').value;
   const { error } = await sb.from('lost_records').update({
-    school, province: $('eProvince').value.trim(), education_office: $('eOffice').value.trim(),
+    school, province, education_office: office,
     status: $('uStatus').value, lost_status: $('uLost').value, zone: $('uZone').value, link, located
   }).eq('id', editingId);
   if (error) return fail('อัปเดตไม่สำเร็จ: ' + error.message);
   closeM('mUpd'); ok('บันทึกการแก้ไขเรียบร้อย'); loadData();
 }
+
+/* ---------- Finish / ลบ ---------- */
 async function finishRecord(id){
   const r = data.find(x => x.id === id);
   if (!r) return;
@@ -556,6 +600,7 @@ async function removeHistory(id){
   if (error) return fail('ลบจากประวัติไม่สำเร็จ: ' + error.message);
   ok('ลบออกจากประวัติแล้ว'); loadData();
 }
+
 function exportCSV(){
   const list = view === 'history' ? history : filtered();
   const head = ['ชื่อโรงเรียน','จังหวัด','สพม./สพป.','Zone','รุ่น','SN/IMEI','เบอร์ติดต่อ','วัน-เวลาที่กดสั่ง','สถานะปัจจุบัน','Lost Mode','ลิงก์พิกัด','หมายเหตุ','ผู้บันทึก'];
