@@ -64,19 +64,33 @@ button:active{transform:scale(.97)}
 button.ghost{background:var(--ghost);color:var(--ghost-text);box-shadow:none}
 button.danger{background:linear-gradient(120deg,#f43f5e,#db2777)}
 button.ok{background:linear-gradient(120deg,#10b981,#0d9488)}
-button.small{padding:5px 9px;font-size:12px;border-radius:8px}
-.table-wrap{overflow-x:auto;margin-top:14px;border-radius:12px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;min-width:0}
-th,td{padding:10px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;font-size:13px}
-th{background:linear-gradient(120deg,#ecfeff,#e0f2fe);color:var(--navy);font-weight:700;white-space:nowrap}
-td{white-space:normal;word-break:break-word}
-td.nowrap{white-space:nowrap}
-/* คอลัมน์จัดการอยู่ติดขวาเสมอ */
-th.act,td.act{position:sticky;right:0;background:#fff;z-index:2;box-shadow:-6px 0 8px -6px rgba(8,145,178,.25);min-width:132px}
-th.act{background:linear-gradient(120deg,#ecfeff,#e0f2fe)}
+button.small{padding:5px 9px;font-size:12px;border-radius:8px;white-space:nowrap}
+
+/* กรอบตาราง: เลื่อนได้เฉพาะภายในกรอบ และหัวตารางติดอยู่ด้านบน */
+.table-wrap{margin-top:14px;border-radius:12px;border:1px solid var(--border);max-height:65vh;overflow:auto;overscroll-behavior:contain;background:#fff}
+table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;font-size:13px;line-height:1.45}
+th{position:sticky;top:0;z-index:3;background:linear-gradient(120deg,#ecfeff,#e0f2fe);color:var(--navy);font-weight:700;white-space:nowrap;box-shadow:0 1px 0 var(--border)}
+td{white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
+td.nowrap,td.keep{white-space:nowrap}
+.c-name{min-width:180px}
+.c-prov{min-width:120px;white-space:nowrap}
+.c-office{min-width:170px}
+.c-zone{min-width:92px;white-space:nowrap}
+.c-model{min-width:110px;white-space:nowrap}
+.c-imei{min-width:150px;white-space:nowrap}
+.c-phone{min-width:120px;white-space:nowrap}
+.c-date{min-width:150px;white-space:nowrap}
+.c-status{min-width:130px;white-space:nowrap}
+.c-lost{min-width:130px;white-space:nowrap}
+.c-map{min-width:110px;white-space:nowrap}
+.c-note{min-width:200px;max-width:260px}
+.c-rec{min-width:110px;white-space:nowrap}
+.c-act{min-width:112px;white-space:nowrap;position:sticky;right:0;z-index:2;background:#fff;box-shadow:-6px 0 8px -6px rgba(8,145,178,.25)}
+th.c-act{z-index:4;background:linear-gradient(120deg,#ecfeff,#e0f2fe)}
 tbody tr{transition:background .2s;animation:fadeUp .35s ease both}
 tbody tr:hover td{background:#f0fdfa}
-tbody tr:hover td.act{background:#f0fdfa}
+tbody tr:hover td.c-act{background:#f0fdfa}
 .badge{padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;display:inline-block}
 .b-on{background:#cffafe;color:#0e7490}
 .b-off{background:#ffedd5;color:#c2410c}
@@ -110,7 +124,7 @@ a.link:hover{text-decoration:underline}
 #status{font-size:13px;margin-top:10px;color:#dc2626}
 .swal2-popup{border-radius:20px !important}
 .swal2-title{font-weight:800 !important;color:#0c4a6e !important}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}main{padding:14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}.table-wrap{max-height:70vh}}
 </style>
 </head>
 <body class="login-bg">
@@ -176,10 +190,11 @@ a.link:hover{text-decoration:underline}
       <table>
         <thead>
           <tr>
-            <th>#</th><th>ชื่อโรงเรียน</th><th>จังหวัด</th><th>สพม./สพป.</th><th>Zone</th><th>รุ่น</th><th>SN / IMEI</th>
-            <th>เบอร์ติดต่อ</th><th>วัน-เวลาที่กดสั่ง</th>
-            <th>สถานะปัจจุบัน (MDM)</th><th>Lost Mode</th><th>แผนที่</th>
-            <th>หมายเหตุ</th><th>ผู้บันทึก</th><th class="act">จัดการ</th>
+            <th>#</th><th class="c-name">ชื่อโรงเรียน</th><th class="c-prov">จังหวัด</th><th class="c-office">สพม./สพป.</th>
+            <th class="c-zone">Zone</th><th class="c-model">รุ่น</th><th class="c-imei">SN / IMEI</th>
+            <th class="c-phone">เบอร์ติดต่อ</th><th class="c-date">วัน-เวลาที่กดสั่ง</th>
+            <th class="c-status">สถานะปัจจุบัน (MDM)</th><th class="c-lost">Lost Mode</th><th class="c-map">แผนที่</th>
+            <th class="c-note">หมายเหตุ</th><th class="c-rec">ผู้บันทึก</th><th class="c-act">จัดการ</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -377,16 +392,16 @@ function renderKpis(){
 }
 const statusBadge = s => `<span class="badge ${s==='online'?'b-on':'b-off'}">${s==='online'?'Online':'Offline'}</span>`;
 const cellsCommon = r => `
-      <td><b>${esc(r.school)}</b></td>
-      <td>${esc(r.province) || '-'}</td>
-      <td>${r.office ? `<span class="badge b-office">${esc(r.office)}</span>` : '-'}</td>
-      <td><span class="badge b-zone">Zone ${esc(r.zone)}</span></td>
-      <td>${esc(r.model)}</td>
-      <td>${esc(r.imei)}</td>
-      <td class="nowrap">${esc(r.phone)}</td>
-      <td class="nowrap">${fmtDate(r.lostAt)}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td><span class="badge ${LOST_CLASS[r.lost_status]}">${LOST_LABEL[r.lost_status]}</span></td>`;
+      <td class="c-name"><b>${esc(r.school)}</b></td>
+      <td class="c-prov">${esc(r.province) || '-'}</td>
+      <td class="c-office">${r.office ? `<span class="badge b-office">${esc(r.office)}</span>` : '-'}</td>
+      <td class="c-zone"><span class="badge b-zone">Zone ${esc(r.zone)}</span></td>
+      <td class="c-model">${esc(r.model)}</td>
+      <td class="c-imei">${esc(r.imei)}</td>
+      <td class="c-phone">${esc(r.phone)}</td>
+      <td class="c-date">${fmtDate(r.lostAt)}</td>
+      <td class="c-status">${statusBadge(r.status)}</td>
+      <td class="c-lost"><span class="badge ${LOST_CLASS[r.lost_status]}">${LOST_LABEL[r.lost_status]}</span></td>`;
 
 function render(){
   renderKpis();
@@ -396,10 +411,10 @@ function render(){
     const link = mapUrl(r.link);
     return `<tr style="animation-delay:${i*0.03}s">
       <td>${i+1}</td>${cellsCommon(r)}
-      <td>${link ? `<a class="link" href="${esc(link)}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
-      <td>${esc(r.note)}</td>
-      <td>${esc(r.recorder)}</td>
-      <td class="act"><div class="btns">
+      <td class="c-map">${link ? `<a class="link" href="${esc(link)}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
+      <td class="c-note">${esc(r.note)}</td>
+      <td class="c-rec">${esc(r.recorder)}</td>
+      <td class="c-act"><div class="btns">
         <button class="small" onclick="openUpdate('${r.id}')">แก้ไข</button>
         <button class="small ok" onclick="finishRecord('${r.id}')">Finish</button>
         <button class="small danger" onclick="removeRecord('${r.id}')">ลบ</button>
@@ -413,10 +428,10 @@ function renderHistory(){
   const list = history.filter(r => !q || matchText(r).includes(q)).sort((a,b) => b.finishedAt - a.finishedAt);
   $('rows').innerHTML = list.map((r, i) => `<tr style="animation-delay:${i*0.03}s">
       <td>${i+1}</td>${cellsCommon(r)}
-      <td>${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
-      <td>${esc(r.note)}</td>
-      <td>${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
-      <td class="act"><div class="btns">
+      <td class="c-map">${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
+      <td class="c-note">${esc(r.note)}</td>
+      <td class="c-rec">${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
+      <td class="c-act"><div class="btns">
         <button class="small danger" onclick="removeHistory('${r.id}')">ลบ</button>
       </div></td>
     </tr>`).join('') || `<tr><td colspan="15" class="muted" style="text-align:center;padding:30px">ยังไม่มีประวัติ</td></tr>`;
