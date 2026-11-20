@@ -64,21 +64,27 @@ button:active{transform:scale(.97)}
 button.ghost{background:var(--ghost);color:var(--ghost-text);box-shadow:none}
 button.danger{background:linear-gradient(120deg,#f43f5e,#db2777)}
 button.ok{background:linear-gradient(120deg,#10b981,#0d9488)}
-button.small{padding:6px 11px;font-size:13px;border-radius:8px}
+button.small{padding:5px 9px;font-size:12px;border-radius:8px}
 .table-wrap{overflow-x:auto;margin-top:14px;border-radius:12px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;min-width:1300px}
-th,td{padding:12px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;white-space:nowrap}
-th{background:linear-gradient(120deg,#ecfeff,#e0f2fe);font-size:13px;color:var(--navy);font-weight:700}
+table{width:100%;border-collapse:collapse;min-width:0}
+th,td{padding:10px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;font-size:13px}
+th{background:linear-gradient(120deg,#ecfeff,#e0f2fe);color:var(--navy);font-weight:700;white-space:nowrap}
+td{white-space:normal;word-break:break-word}
+td.nowrap{white-space:nowrap}
+/* คอลัมน์จัดการอยู่ติดขวาเสมอ */
+th.act,td.act{position:sticky;right:0;background:#fff;z-index:2;box-shadow:-6px 0 8px -6px rgba(8,145,178,.25);min-width:132px}
+th.act{background:linear-gradient(120deg,#ecfeff,#e0f2fe)}
 tbody tr{transition:background .2s;animation:fadeUp .35s ease both}
-tbody tr:hover{background:#f0fdfa}
-.badge{padding:4px 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;display:inline-block}
+tbody tr:hover td{background:#f0fdfa}
+tbody tr:hover td.act{background:#f0fdfa}
+.badge{padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;display:inline-block}
 .b-on{background:#cffafe;color:#0e7490}
 .b-off{background:#ffedd5;color:#c2410c}
 .b-sent{background:#d1fae5;color:#047857}
 .b-sending{background:#fef9c3;color:#a16207}
 .b-notsent{background:#fee2e2;color:#b91c1c}
 .b-zone{background:#e0e7ff;color:#3730a3}
-.b-office{background:#fce7f3;color:#9d174d}
+.b-office{background:#fce7f3;color:#9d174d;white-space:normal}
 .modal{position:fixed;inset:0;background:rgba(12,74,110,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal.show{display:flex;animation:fadeUp .25s ease}
 .modal .box{background:#fff;color:var(--text);border-radius:18px;padding:24px;width:100%;max-width:620px;max-height:90vh;overflow:auto;box-shadow:0 24px 60px rgba(8,145,178,.3);animation:pop .3s ease}
@@ -92,7 +98,7 @@ tbody tr:hover{background:#f0fdfa}
 .muted{color:var(--muted);font-size:13px}
 a.link{color:#0891b2;font-weight:600;text-decoration:none}
 a.link:hover{text-decoration:underline}
-.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btns{display:flex;flex-direction:column;gap:5px;align-items:stretch}
 #login{max-width:420px;margin:50px auto;padding:0 16px;animation:pop .5s ease}
 #login .card{padding:30px 28px;background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(255,255,255,.6);border-radius:22px;box-shadow:0 20px 50px rgba(2,44,34,.35)}
 #login h3{margin:0 0 6px;font-size:22px;font-weight:800;color:#0c4a6e;text-align:center}
@@ -173,7 +179,7 @@ a.link:hover{text-decoration:underline}
             <th>#</th><th>ชื่อโรงเรียน</th><th>จังหวัด</th><th>สพม./สพป.</th><th>Zone</th><th>รุ่น</th><th>SN / IMEI</th>
             <th>เบอร์ติดต่อ</th><th>วัน-เวลาที่กดสั่ง</th>
             <th>สถานะปัจจุบัน (MDM)</th><th>Lost Mode</th><th>แผนที่</th>
-            <th>หมายเหตุ</th><th>ผู้บันทึก</th><th>จัดการ</th>
+            <th>หมายเหตุ</th><th>ผู้บันทึก</th><th class="act">จัดการ</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -377,8 +383,8 @@ const cellsCommon = r => `
       <td><span class="badge b-zone">Zone ${esc(r.zone)}</span></td>
       <td>${esc(r.model)}</td>
       <td>${esc(r.imei)}</td>
-      <td>${esc(r.phone)}</td>
-      <td>${fmtDate(r.lostAt)}</td>
+      <td class="nowrap">${esc(r.phone)}</td>
+      <td class="nowrap">${fmtDate(r.lostAt)}</td>
       <td>${statusBadge(r.status)}</td>
       <td><span class="badge ${LOST_CLASS[r.lost_status]}">${LOST_LABEL[r.lost_status]}</span></td>`;
 
@@ -393,7 +399,7 @@ function render(){
       <td>${link ? `<a class="link" href="${esc(link)}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
       <td>${esc(r.note)}</td>
       <td>${esc(r.recorder)}</td>
-      <td><div class="btns">
+      <td class="act"><div class="btns">
         <button class="small" onclick="openUpdate('${r.id}')">แก้ไข</button>
         <button class="small ok" onclick="finishRecord('${r.id}')">Finish</button>
         <button class="small danger" onclick="removeRecord('${r.id}')">ลบ</button>
@@ -410,7 +416,7 @@ function renderHistory(){
       <td>${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">เปิดแผนที่</a>` : '-'}</td>
       <td>${esc(r.note)}</td>
       <td>${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
-      <td><div class="btns">
+      <td class="act"><div class="btns">
         <button class="small danger" onclick="removeHistory('${r.id}')">ลบ</button>
       </div></td>
     </tr>`).join('') || `<tr><td colspan="15" class="muted" style="text-align:center;padding:30px">ยังไม่มีประวัติ</td></tr>`;
