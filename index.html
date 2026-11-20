@@ -260,11 +260,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 /* ---------- ข้อมูลอ้างอิงจากตาราง ref_offices (คอลัมน์: จังหวัด, เขต) ---------- */
-let REF = [];            // [{ province, office }]
-let PROVINCES = [];      // รายชื่อจังหวัดไม่ซ้ำ เรียงตามตัวอักษร
+let REF = [];
+let PROVINCES = [];
 
 async function loadRef(){
-  const { data: rows, error } = await sb.from('ref_offices').select('จังหวัด,เขต').limit(5000);
+  const { data: rows, error } = await sb.from('ref_offices').select('*').limit(5000);
   if (error) { console.warn('โหลด ref_offices ไม่สำเร็จ', error.message); return; }
   REF = rows.filter(r => r['จังหวัด'] && r['เขต'])
             .map(r => ({ province: String(r['จังหวัด']).trim(), office: String(r['เขต']).trim() }));
@@ -278,7 +278,6 @@ function officesOf(province){
   return [...new Set(REF.filter(r => r.province === province).map(r => r.office))]
     .sort((a,b) => a.localeCompare(b, 'th'));
 }
-/* เติมตัวเลือก สพม./สพป. ตามจังหวัด; ถ้าค่าเดิมไม่อยู่ในตาราง ให้แสดงไว้ด้วย */
 function fillOfficeSelect(sel, province, selected){
   if (!province) {
     sel.innerHTML = '<option value="">-- เลือกจังหวัดก่อน --</option>';
