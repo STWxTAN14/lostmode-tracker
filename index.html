@@ -17,13 +17,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  --teal:#0d9488;--cyan:#0891b2;--blue:#2563eb;--navy:#0c4a6e;
-  --ink:#0f172a;--muted:#64748b;--line:rgba(13,148,136,.18);
-  --glass-strong:rgba(255,255,255,.88);
-  --surface:#ffffff;--input-bg:#ffffff;--th-bg:linear-gradient(120deg,#ecfeff,#e0f2fe);
-  --td-hover:#f0fdfa;--heading:#0c4a6e;--label:#0e7490;
+  --navy:#0c4a6e;--ink:#0f172a;--muted:#64748b;--line:rgba(13,148,136,.18);
+  --glass-strong:rgba(255,255,255,.88);--surface:#ffffff;--input-bg:#ffffff;
+  --th-bg:linear-gradient(120deg,#ecfeff,#e0f2fe);--td-hover:#f0fdfa;--heading:#0c4a6e;--label:#0e7490;
   --shadow:0 10px 30px rgba(2,44,34,.12),0 2px 6px rgba(2,44,34,.06);
   --grad:linear-gradient(120deg,#0d9488,#0891b2 50%,#2563eb);
   --ghost-bg:rgba(224,242,254,.9);--ghost-fg:#0c4a6e;
@@ -31,24 +32,21 @@
   --hdr-bg:rgba(255,255,255,.55);--hdr-text:#0f172a;--sub:#0f766e;
   --tabs-bg:rgba(255,255,255,.88);
   --app-tint-1:rgba(236,253,245,.55);--app-tint-2:rgba(224,247,250,.55);--app-tint-3:rgba(224,236,255,.6);
-  --login-card:rgba(255,255,255,.78);
-  --login-scrim:rgba(224,247,250,.25);
-  --login-accent:#0d9488;
+  --login-card:rgba(255,255,255,.78);--login-scrim:rgba(224,247,250,.25);--login-accent:#0d9488;
+  --chart-text:#334155;--chart-grid:rgba(15,23,42,.08);
 }
 html[data-theme="dark"]{
   --ink:#e2e8f0;--muted:#94a3b8;--line:rgba(45,212,191,.18);
-  --glass-strong:rgba(15,23,42,.86);
-  --surface:#0f172a;--input-bg:#1e293b;--th-bg:linear-gradient(120deg,#0f2a35,#14283d);
-  --td-hover:#12303a;--heading:#7dd3fc;--label:#67e8f9;
+  --glass-strong:rgba(15,23,42,.86);--surface:#0f172a;--input-bg:#1e293b;
+  --th-bg:linear-gradient(120deg,#0f2a35,#14283d);--td-hover:#12303a;--heading:#7dd3fc;--label:#67e8f9;
   --shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3);
   --ghost-bg:rgba(30,41,59,.9);--ghost-fg:#e0f2fe;
   --overlay:rgba(0,0,0,.6);--modal-bg:rgba(15,23,42,.97);
   --hdr-bg:rgba(15,23,42,.6);--hdr-text:#e2e8f0;--sub:#5eead4;
   --tabs-bg:rgba(15,23,42,.88);
   --app-tint-1:rgba(2,6,23,.72);--app-tint-2:rgba(15,23,42,.72);--app-tint-3:rgba(8,47,73,.7);
-  --login-card:rgba(15,23,42,.8);
-  --login-scrim:rgba(2,6,23,.55);
-  --login-accent:#2dd4bf;
+  --login-card:rgba(15,23,42,.8);--login-scrim:rgba(2,6,23,.55);--login-accent:#2dd4bf;
+  --chart-text:#cbd5e1;--chart-grid:rgba(148,163,184,.15);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -59,23 +57,19 @@ html[data-theme="dark"] body{background:linear-gradient(160deg,#020617 0%,#0f172
 body.app-bg::before{content:"";position:fixed;inset:0;background:url('SICCC.jpg') center/cover fixed no-repeat;z-index:-2;transform:scale(1.04)}
 body.app-bg::after{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 10%,rgba(13,148,136,.25),transparent 45%),radial-gradient(circle at 85% 90%,rgba(37,99,235,.22),transparent 50%),linear-gradient(160deg,var(--app-tint-1),var(--app-tint-2) 50%,var(--app-tint-3));z-index:-1;backdrop-filter:blur(2px)}
 
-/* ---------- พื้นหลังหน้า Login (รูปเดียวกันทั้งสองโหมด + เลเยอร์ตามโหมด) ---------- */
 #loginBg{position:fixed;inset:0;z-index:-3;display:none;overflow:hidden;background:#0c4a6e url('On-dis.jpg') center/cover fixed no-repeat}
 body.login-bg #loginBg{display:block}
 #loginBg::after{content:"";position:absolute;inset:0;background:var(--login-scrim);transition:background .4s}
-/* แสงไหลบนพื้นหลัง */
 #loginBg .aurora{position:absolute;inset:-20%;background:
   radial-gradient(40% 35% at 20% 30%,rgba(45,212,191,.35),transparent 70%),
   radial-gradient(38% 34% at 80% 70%,rgba(37,99,235,.32),transparent 70%),
   radial-gradient(30% 28% at 60% 20%,rgba(167,139,250,.25),transparent 70%);
   filter:blur(40px);animation:auroraMove 16s ease-in-out infinite alternate;mix-blend-mode:screen;opacity:.9}
 @keyframes auroraMove{0%{transform:translate3d(-3%,-2%,0) scale(1)}50%{transform:translate3d(3%,2%,0) scale(1.08)}100%{transform:translate3d(-2%,3%,0) scale(1.03)}}
-/* อนุภาคลอยขึ้น */
 #loginBg .particles{position:absolute;inset:0;pointer-events:none}
 #loginBg .p{position:absolute;bottom:-20px;width:var(--s,6px);height:var(--s,6px);border-radius:50%;background:radial-gradient(circle,#ffffff,rgba(255,255,255,0));opacity:0;animation:rise var(--d,14s) linear var(--delay,0s) infinite}
 @keyframes rise{0%{transform:translateY(0) translateX(0);opacity:0}10%{opacity:.9}90%{opacity:.6}100%{transform:translateY(-110vh) translateX(var(--dx,30px));opacity:0}}
 
-/* ---------- Header ---------- */
 header{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   padding:12px 28px;min-height:84px;color:var(--hdr-text);
   background:var(--hdr-bg);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
@@ -87,19 +81,16 @@ header{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-
 @keyframes float{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 4px))}}
 .hdr-right{flex:1;display:flex;justify-content:flex-end;align-items:center;gap:10px}
 .theme-btn{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;background:var(--ghost-bg);color:var(--ghost-fg);box-shadow:var(--shadow)}
-.theme-btn:hover{background:var(--ghost-bg);filter:brightness(1.05)}
 
 main{padding:24px;max-width:1380px;margin:0 auto;animation:fadeUp .5s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
 
-/* ---------- Tabs ---------- */
-.tabs{display:inline-flex;gap:4px;margin-bottom:18px;background:var(--tabs-bg);padding:6px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.tabs{display:inline-flex;gap:4px;margin-bottom:18px;background:var(--tabs-bg);padding:6px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);flex-wrap:wrap}
 .tab{background:transparent;color:var(--heading);padding:10px 20px;box-shadow:none;border-radius:12px;font-weight:700}
 .tab:hover{transform:none;filter:none;box-shadow:none;background:rgba(13,148,136,.1)}
 .tab.on{background:var(--grad);color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.35)}
 
-/* ---------- KPI ---------- */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}
 .kpi{--c1:#06b6d4;--c2:#2563eb;position:relative;overflow:hidden;cursor:pointer;background:var(--glass-strong);border:1px solid var(--line);border-radius:20px;padding:20px 22px;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s;animation:pop .5s ease both}
 .kpi:nth-child(2){animation-delay:.06s}.kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.18s}
@@ -116,7 +107,6 @@ main{padding:24px;max-width:1380px;margin:0 auto;animation:fadeUp .5s ease both}
 .c-green{--c1:#10b981;--c2:#0d9488}
 .c-red{--c1:#f43f5e;--c2:#db2777}
 
-/* ---------- Card / Toolbar ---------- */
 .card{background:var(--glass-strong);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .search-wrap{position:relative;flex:1;min-width:260px}
@@ -129,34 +119,27 @@ select:disabled{opacity:.55}
 input[type=date]{min-width:150px;color-scheme:inherit}
 option{background:var(--surface);color:var(--ink)}
 
-/* ---------- Buttons ---------- */
-button{position:relative;overflow:hidden;padding:10px 18px;border:0;border-radius:12px;background:var(--grad);background-size:200% 100%;color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s,background-position .4s;box-shadow:0 6px 16px rgba(37,99,235,.25)}
-button:hover{transform:translateY(-2px);background-position:100% 0;box-shadow:0 10px 24px rgba(37,99,235,.32)}
-button:active{transform:scale(.97)}
+/* ---------- ปุ่ม (รองรับ Magnetic) ---------- */
+button{position:relative;overflow:hidden;padding:10px 18px;border:0;border-radius:12px;background:var(--grad);background-size:200% 100%;color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:transform .2s cubic-bezier(.2,.9,.3,1.3),box-shadow .2s,background-position .4s;box-shadow:0 6px 16px rgba(37,99,235,.25);will-change:transform}
+button:hover{background-position:100% 0;box-shadow:0 10px 24px rgba(37,99,235,.32)}
+button:active{transform:scale(.97)!important}
 button.ghost{background:var(--ghost-bg);color:var(--ghost-fg);box-shadow:none}
 button.ghost:hover{filter:brightness(1.05);box-shadow:0 6px 14px rgba(8,145,178,.15)}
 button.danger{background:linear-gradient(120deg,#f43f5e,#db2777)}
 button.ok{background:linear-gradient(120deg,#10b981,#0d9488)}
 button.small{padding:6px 11px;font-size:12px;border-radius:9px;white-space:nowrap}
 
-/* ---------- Table ---------- */
 .table-wrap{margin-top:16px;border-radius:16px;border:1px solid var(--line);max-height:64vh;overflow:auto;overscroll-behavior:contain;background:var(--surface)}
 table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0}
 th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;font-size:13px;line-height:1.45;color:var(--ink)}
 th{position:sticky;top:0;z-index:3;background:var(--th-bg);color:var(--heading);font-weight:800;white-space:nowrap;box-shadow:0 1px 0 var(--line)}
 td{white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
-.c-name{min-width:190px}
-.c-prov{min-width:120px;white-space:nowrap}
-.c-office{min-width:180px}
-.c-zone{min-width:92px;white-space:nowrap}
-.c-model{min-width:110px;white-space:nowrap}
+.c-name{min-width:190px}.c-prov{min-width:120px;white-space:nowrap}.c-office{min-width:180px}
+.c-zone{min-width:92px;white-space:nowrap}.c-model{min-width:110px;white-space:nowrap}
 .c-imei{min-width:150px;white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
-.c-phone{min-width:120px;white-space:nowrap}
-.c-date{min-width:150px;white-space:nowrap}
-.c-status{min-width:130px;white-space:nowrap}
-.c-lost{min-width:130px;white-space:nowrap}
-.c-map{min-width:110px;white-space:nowrap}
-.c-note{min-width:200px;max-width:260px}
+.c-phone{min-width:120px;white-space:nowrap}.c-date{min-width:150px;white-space:nowrap}
+.c-status{min-width:130px;white-space:nowrap}.c-lost{min-width:130px;white-space:nowrap}
+.c-map{min-width:110px;white-space:nowrap}.c-note{min-width:200px;max-width:260px}
 .c-rec{min-width:110px;white-space:nowrap}
 .c-act{min-width:118px;white-space:nowrap;position:sticky;right:0;z-index:2;background:var(--surface);box-shadow:-8px 0 10px -8px rgba(8,145,178,.3)}
 th.c-act{z-index:4;background:var(--th-bg)}
@@ -166,15 +149,11 @@ tbody tr:hover td.c-act{background:var(--td-hover)}
 .row-no{color:var(--muted);font-weight:700}
 .school{font-weight:800;color:var(--ink)}
 
-/* ---------- Badges ---------- */
 .badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
 .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
-.b-on{background:#cffafe;color:#0e7490}
-.b-off{background:#ffedd5;color:#c2410c}
-.b-sent{background:#d1fae5;color:#047857}
-.b-sending{background:#fef9c3;color:#a16207}
-.b-notsent{background:#fee2e2;color:#b91c1c}
-.b-zone{background:#e0e7ff;color:#3730a3}
+.b-on{background:#cffafe;color:#0e7490}.b-off{background:#ffedd5;color:#c2410c}
+.b-sent{background:#d1fae5;color:#047857}.b-sending{background:#fef9c3;color:#a16207}
+.b-notsent{background:#fee2e2;color:#b91c1c}.b-zone{background:#e0e7ff;color:#3730a3}
 .b-office{background:#fce7f3;color:#9d174d;white-space:normal;line-height:1.3}
 html[data-theme="dark"] .b-on{background:rgba(8,145,178,.25);color:#67e8f9}
 html[data-theme="dark"] .b-off{background:rgba(234,88,12,.25);color:#fdba74}
@@ -185,12 +164,23 @@ html[data-theme="dark"] .b-zone{background:rgba(99,102,241,.25);color:#c7d2fe}
 html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 .btns{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 
-/* ---------- Empty ---------- */
 .empty{text-align:center;padding:44px 20px;color:var(--muted)}
 .empty .ico{font-size:44px;display:block;margin-bottom:8px}
 .empty b{display:block;color:var(--heading);font-size:15px;margin-bottom:4px}
 
-/* ---------- Modal ---------- */
+/* ---------- แผนที่ + กราฟ ---------- */
+.view-block{display:block}
+.view-block.hidden{display:none !important}
+#mapBox{height:460px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:var(--surface)}
+.chart-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;margin-top:18px}
+.chart-card{background:var(--glass-strong);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);position:relative;min-height:320px}
+.chart-card h4{margin:0 0 10px;font-size:15px;font-weight:800;color:var(--heading)}
+.chart-card canvas{max-height:300px}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr}}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--modal-bg);color:var(--ink)}
+.leaflet-container{font-family:inherit}
+.map-sum{margin:0 0 12px;color:var(--muted);font-size:13px;font-weight:600}
+
 .modal{position:fixed;inset:0;background:var(--overlay);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal.show{display:flex;animation:fadeUp .25s ease}
 .modal .box{background:var(--modal-bg);color:var(--ink);border-radius:22px;padding:26px;width:100%;max-width:640px;max-height:90vh;overflow:auto;box-shadow:0 30px 70px rgba(8,145,178,.35);animation:pop .35s cubic-bezier(.2,.9,.3,1.2);border:1px solid var(--line)}
@@ -205,7 +195,7 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 a.link{color:#0891b2;font-weight:700;text-decoration:none}
 a.link:hover{text-decoration:underline}
 
-/* ---------- Login: กล่องลอย + แอนิเมชัน ---------- */
+/* ---------- Login ---------- */
 @keyframes loginFloat{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-12px) rotateX(2deg)}}
 @keyframes loginIn{0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(18deg)}60%{opacity:1;transform:translateY(-8px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:none}}
 @keyframes borderSpin{0%{--ang:0deg}100%{--ang:360deg}}
@@ -215,15 +205,11 @@ a.link:hover{text-decoration:underline}
 @keyframes sheen{0%{transform:translateX(-120%) skewX(-20deg)}100%{transform:translateX(220%) skewX(-20deg)}}
 @keyframes scanline{0%{top:-10%}100%{top:110%}}
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
-
 #login{position:relative;max-width:430px;margin:70px auto;padding:0 16px;perspective:1200px;animation:loginFloat 6s ease-in-out infinite;--login-glow:rgba(45,212,191,.45);--login-glow2:rgba(8,145,178,.55)}
 html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:rgba(45,212,191,.45)}
 #login .card{position:relative;padding:32px 30px;background:var(--login-card);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid rgba(255,255,255,.2);border-radius:24px;box-shadow:0 24px 60px rgba(2,44,34,.4);overflow:hidden;animation:loginIn .9s cubic-bezier(.2,.9,.3,1.1) both,glowPulse 4s ease-in-out 1s infinite}
-/* ขอบไล่สีหมุน */
 #login .card::before{content:"";position:absolute;inset:-2px;border-radius:26px;padding:2px;background:conic-gradient(from var(--ang),#2dd4bf,#0891b2,#2563eb,#a78bfa,#2dd4bf);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderSpin 5s linear infinite;pointer-events:none;opacity:.9}
-/* แสงวิ่งผ่านการ์ด */
 #login .card::after{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:sheen 4.5s ease-in-out 1.2s infinite;pointer-events:none}
-/* เส้นสแกนบาง ๆ */
 #login .scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--login-accent),transparent);opacity:.5;animation:scanline 6s linear infinite;pointer-events:none;z-index:1}
 #login h3{margin:0 0 4px;font-size:24px;font-weight:800;text-align:center;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;animation:titleIn .9s ease .2s both}
 #login .login-sub{text-align:center;font-size:13px;color:var(--sub);margin-bottom:20px;font-weight:600;animation:fieldIn .6s ease .35s both}
@@ -231,29 +217,28 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
 #login .field:nth-of-type(1){animation-delay:.45s}
 #login .field:nth-of-type(2){animation-delay:.55s}
 #login input{background:var(--input-bg);border:1px solid rgba(13,148,136,.35);padding:13px 14px;font-size:15px}
-#login input:focus{transform:translateY(-1px)}
 #login button.login-btn{width:100%;margin-top:22px;padding:14px;font-size:16px;border-radius:14px;animation:fieldIn .6s ease .7s both}
-#login button.login-btn:hover{transform:translateY(-3px) scale(1.01)}
 
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626;font-weight:600}
 .swal2-popup{border-radius:22px !important;background:var(--modal-bg) !important;color:var(--ink) !important}
 .swal2-title{font-weight:800 !important;color:var(--heading) !important}
 .swal2-html-container{color:var(--ink) !important}
+#confettiCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:200}
 @media(max-width:700px){
   .grid2{grid-template-columns:1fr}main{padding:14px}header{padding:10px 14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}
-  .table-wrap{max-height:70vh}.kpi .n{font-size:28px}
+  .table-wrap{max-height:70vh}.kpi .n{font-size:28px}#mapBox{height:360px}
 }
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
 <body class="login-bg">
 
-<!-- พื้นหลังหน้า Login: รูปเดิม + แสงไหล + อนุภาค -->
 <div id="loginBg" aria-hidden="true">
   <div class="aurora"></div>
   <div class="particles" id="particles"></div>
 </div>
+<canvas id="confettiCanvas"></canvas>
 
 <header id="hdr">
   <div class="hdr-left">
@@ -282,57 +267,72 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
   <div class="tabs">
     <button class="tab on" id="tabMain" onclick="setView('main')">📋 รายการ Lost Mode</button>
     <button class="tab" id="tabHist" onclick="setView('history')">🗂 ประวัติ (Finish แล้ว)</button>
+    <button class="tab" id="tabMap" onclick="setView('map')">🗺 แผนที่และสรุป</button>
   </div>
 
-  <div class="kpis" id="kpis">
-    <div class="kpi c-blue" data-k="online"><span class="ico">🟦</span><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
-    <div class="kpi c-orange" data-k="offline"><span class="ico">🟧</span><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
-    <div class="kpi c-green" data-k="sent"><span class="ico">🟩</span><div class="n" id="k3">0</div><div class="l">ส่ง Lost Mode แล้ว</div></div>
-    <div class="kpi c-red" data-k="notsent"><span class="ico">🟥</span><div class="n" id="k4">0</div><div class="l">ยังไม่ได้ส่ง</div></div>
-  </div>
+  <div id="viewTable">
+    <div class="kpis" id="kpis">
+      <div class="kpi c-blue" data-k="online"><span class="ico">🟦</span><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
+      <div class="kpi c-orange" data-k="offline"><span class="ico">🟧</span><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
+      <div class="kpi c-green" data-k="sent"><span class="ico">🟩</span><div class="n" id="k3">0</div><div class="l">ส่ง Lost Mode แล้ว</div></div>
+      <div class="kpi c-red" data-k="notsent"><span class="ico">🟥</span><div class="n" id="k4">0</div><div class="l">ยังไม่ได้ส่ง</div></div>
+    </div>
 
-  <div class="card">
-    <div class="toolbar">
-      <div class="search-wrap"><span>🔍</span>
-        <input type="search" id="search" placeholder="ค้นหาโรงเรียน / จังหวัด / สพม./สพป. / รุ่น / SN / เบอร์ / หมายเหตุ / ผู้บันทึก">
+    <div class="card">
+      <div class="toolbar">
+        <div class="search-wrap"><span>🔍</span>
+          <input type="search" id="search" placeholder="ค้นหาโรงเรียน / จังหวัด / สพม./สพป. / รุ่น / SN / เบอร์ / หมายเหตุ / ผู้บันทึก">
+        </div>
+        <input type="date" id="dFrom" title="จากวันที่">
+        <input type="date" id="dTo" title="ถึงวันที่">
+        <select id="fZone">
+          <option value="all">Zone: ทั้งหมด</option>
+          <option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option>
+        </select>
+        <select id="fStatus">
+          <option value="all">สถานะ MDM: ทั้งหมด</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+        </select>
+        <select id="fLost">
+          <option value="all">Lost Mode: ทั้งหมด</option>
+          <option value="sent">ส่งแล้ว</option>
+          <option value="sending">กำลังส่ง</option>
+          <option value="not_sent">ยังไม่ได้ส่ง</option>
+        </select>
+        <button class="ghost" id="btnClear">ล้างตัวกรอง</button>
+        <button onclick="openAdd()">+ เพิ่มรายการ</button>
+        <button class="ghost" onclick="exportCSV()">⬇ Export CSV</button>
       </div>
-      <input type="date" id="dFrom" title="จากวันที่">
-      <input type="date" id="dTo" title="ถึงวันที่">
-      <select id="fZone">
-        <option value="all">Zone: ทั้งหมด</option>
-        <option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option>
-      </select>
-      <select id="fStatus">
-        <option value="all">สถานะ MDM: ทั้งหมด</option>
-        <option value="online">Online</option>
-        <option value="offline">Offline</option>
-      </select>
-      <select id="fLost">
-        <option value="all">Lost Mode: ทั้งหมด</option>
-        <option value="sent">ส่งแล้ว</option>
-        <option value="sending">กำลังส่ง</option>
-        <option value="not_sent">ยังไม่ได้ส่ง</option>
-      </select>
-      <button class="ghost" id="btnClear">ล้างตัวกรอง</button>
-      <button onclick="openAdd()">+ เพิ่มรายการ</button>
-      <button class="ghost" onclick="exportCSV()">⬇ Export CSV</button>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th class="c-name">ชื่อโรงเรียน</th><th class="c-prov">จังหวัด</th><th class="c-office">สพม./สพป.</th>
+              <th class="c-zone">Zone</th><th class="c-model">รุ่น</th><th class="c-imei">SN / IMEI</th>
+              <th class="c-phone">เบอร์ติดต่อ</th><th class="c-date">วัน-เวลาที่กดสั่ง</th>
+              <th class="c-status">สถานะปัจจุบัน (MDM)</th><th class="c-lost">Lost Mode</th><th class="c-map">แผนที่</th>
+              <th class="c-note">หมายเหตุ</th><th class="c-rec">ผู้บันทึก</th><th class="c-act">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="muted" id="count" style="margin-top:12px"></div>
+      <div id="status"></div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th class="c-name">ชื่อโรงเรียน</th><th class="c-prov">จังหวัด</th><th class="c-office">สพม./สพป.</th>
-            <th class="c-zone">Zone</th><th class="c-model">รุ่น</th><th class="c-imei">SN / IMEI</th>
-            <th class="c-phone">เบอร์ติดต่อ</th><th class="c-date">วัน-เวลาที่กดสั่ง</th>
-            <th class="c-status">สถานะปัจจุบัน (MDM)</th><th class="c-lost">Lost Mode</th><th class="c-map">แผนที่</th>
-            <th class="c-note">หมายเหตุ</th><th class="c-rec">ผู้บันทึก</th><th class="c-act">จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+  </div>
+
+  <div id="viewMap" class="hidden">
+    <div class="card">
+      <h4 style="margin:0 0 6px;color:var(--heading);font-weight:800">🗺 แผนที่เครื่องที่มีพิกัด</h4>
+      <p class="map-sum" id="mapSum">กำลังโหลด...</p>
+      <div id="mapBox"></div>
     </div>
-    <div class="muted" id="count" style="margin-top:12px"></div>
-    <div id="status"></div>
+    <div class="chart-grid">
+      <div class="chart-card"><h4>จำนวนเครื่องแยกตาม Zone</h4><canvas id="chartZone"></canvas></div>
+      <div class="chart-card"><h4>จำนวนเครื่องแยกตามจังหวัด</h4><canvas id="chartProv"></canvas></div>
+    </div>
   </div>
 </main>
 
@@ -418,6 +418,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   $('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
   $('themeBtn').title = t === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด';
+  if (typeof refreshChartsTheme === 'function') refreshChartsTheme();
 }
 function toggleTheme(){
   const next = currentTheme() === 'dark' ? 'light' : 'dark';
@@ -431,14 +432,13 @@ if (window.matchMedia) {
   });
 }
 
-/* ---------- อนุภาคลอยขึ้น (สร้างแบบสุ่ม) ---------- */
+/* ---------- อนุภาค ---------- */
 (function makeParticles(){
   const box = document.getElementById('particles');
   for (let i = 0; i < 26; i++) {
     const p = document.createElement('span');
     p.className = 'p';
-    const s = 3 + Math.random() * 7;
-    p.style.setProperty('--s', s + 'px');
+    p.style.setProperty('--s', (3 + Math.random() * 7) + 'px');
     p.style.left = (Math.random() * 100) + '%';
     p.style.setProperty('--d', (10 + Math.random() * 14) + 's');
     p.style.setProperty('--delay', (-Math.random() * 20) + 's');
@@ -447,9 +447,76 @@ if (window.matchMedia) {
   }
 })();
 
-/* ---------- ref_offices (คอลัมน์: จังหวัด, เขต) ---------- */
-let REF = [];
-let PROVINCES = [];
+/* ---------- Confetti (Canvas ในตัว) ---------- */
+const cvs = document.getElementById('confettiCanvas');
+const ctx = cvs.getContext('2d');
+let confetti = [], confettiRunning = false;
+function resizeCanvas(){ cvs.width = innerWidth; cvs.height = innerHeight; }
+resizeCanvas(); addEventListener('resize', resizeCanvas);
+function burstConfetti(kind){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#2dd4bf','#0891b2','#2563eb','#a78bfa','#f59e0b','#10b981','#f43f5e'];
+  const count = kind === 'star' ? 90 : 130;
+  for (let i = 0; i < count; i++) {
+    confetti.push({
+      x: innerWidth / 2 + (Math.random() - .5) * 200,
+      y: innerHeight * 0.35,
+      vx: (Math.random() - .5) * 12,
+      vy: -Math.random() * 14 - 4,
+      g: .32 + Math.random() * .12,
+      s: 6 + Math.random() * 8,
+      r: Math.random() * 360,
+      vr: (Math.random() - .5) * 14,
+      c: colors[Math.floor(Math.random() * colors.length)],
+      star: kind === 'star' || Math.random() < .35,
+      life: 150 + Math.random() * 60
+    });
+  }
+  if (!confettiRunning) { confettiRunning = true; requestAnimationFrame(tickConfetti); }
+}
+function drawStar(x, y, r){
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 ? r * .45 : r;
+    const a = Math.PI / 5 * i;
+    ctx.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
+  }
+  ctx.closePath(); ctx.fill();
+}
+function tickConfetti(){
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+  confetti = confetti.filter(p => p.life > 0 && p.y < innerHeight + 40);
+  for (const p of confetti) {
+    p.vy += p.g; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r * Math.PI / 180);
+    ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life / 40);
+    if (p.star) drawStar(0, 0, p.s / 1.4);
+    else ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+    ctx.restore();
+  }
+  if (confetti.length) requestAnimationFrame(tickConfetti);
+  else { confettiRunning = false; ctx.clearRect(0, 0, cvs.width, cvs.height); }
+}
+
+/* ---------- Magnetic ปุ่ม ---------- */
+function attachMagnetic(){
+  document.querySelectorAll('button').forEach(b => {
+    if (b.dataset.mag) return;
+    b.dataset.mag = '1';
+    b.addEventListener('mousemove', e => {
+      const r = b.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) * .18;
+      const dy = (e.clientY - (r.top + r.height / 2)) * .25;
+      b.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    b.addEventListener('mouseleave', () => { b.style.transform = ''; });
+  });
+}
+new MutationObserver(attachMagnetic).observe(document.body, { childList: true, subtree: true });
+attachMagnetic();
+
+/* ---------- ref_offices ---------- */
+let REF = [], PROVINCES = [];
 async function loadRef(){
   const { data: rows, error } = await sb.from('ref_offices').select('*').limit(5000);
   if (error) { console.warn('โหลด ref_offices ไม่สำเร็จ', error.message); return; }
@@ -462,14 +529,10 @@ function fillProvinceSelect(sel, selected){
     PROVINCES.map(p => `<option value="${esc(p)}" ${p===selected?'selected':''}>${esc(p)}</option>`).join('');
 }
 function officesOf(province){
-  return [...new Set(REF.filter(r => r.province === province).map(r => r.office))]
-    .sort((a,b) => a.localeCompare(b, 'th'));
+  return [...new Set(REF.filter(r => r.province === province).map(r => r.office))].sort((a,b) => a.localeCompare(b, 'th'));
 }
 function fillOfficeSelect(sel, province, selected){
-  if (!province) {
-    sel.innerHTML = '<option value="">-- เลือกจังหวัดก่อน --</option>';
-    sel.disabled = true; return;
-  }
+  if (!province) { sel.innerHTML = '<option value="">-- เลือกจังหวัดก่อน --</option>'; sel.disabled = true; return; }
   const list = officesOf(province);
   if (selected && !list.includes(selected)) list.unshift(selected);
   sel.innerHTML = '<option value="">-- เลือก สพม./สพป. --</option>' +
@@ -493,8 +556,7 @@ function ok(msg){ Toast.fire({ icon:'success', title: msg }); }
 function fail(msg){ Swal.fire({ ...SWAL_BASE, icon:'error', title:'เกิดข้อผิดพลาด', text: msg, confirmButtonText:'ตกลง',
   showClass:{ popup:'animate__animated animate__shakeX' } }); }
 function warn(msg){ Swal.fire({ ...SWAL_BASE, icon:'warning', title:'กรุณาตรวจสอบ', text: msg, confirmButtonText:'ตกลง' }); }
-function confirmBox(opts){ return Swal.fire({ ...SWAL_BASE, icon:'question', showCancelButton:true, reverseButtons:true,
-  cancelButtonText:'ยกเลิก', ...opts }); }
+function confirmBox(opts){ return Swal.fire({ ...SWAL_BASE, icon:'question', showCancelButton:true, reverseButtons:true, cancelButtonText:'ยกเลิก', ...opts }); }
 
 /* ---------- Helpers ---------- */
 let data = [], history = [];
@@ -507,14 +569,21 @@ function fmtDate(ts){
   const d = new Date(ts);
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()+543} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-function esc(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function mapUrl(v){
   if (!v) return '';
   if (/^https?:\/\//i.test(v)) return v;
   const m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
   return m ? `https://www.google.com/maps?q=${m[1]},${m[2]}` : '';
+}
+/* ดึงพิกัด lat,lng จากลิงก์ (รองรับทั้งแบบ "lat,lng" และ Google Maps URL ที่มี q=) */
+function parseLatLng(v){
+  if (!v) return null;
+  let m = v.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  if (m) { const a = +m[1], b = +m[2]; if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return [a, b]; }
+  m = v.match(/[?&](?:q|ll|query)=(-?\d+(?:\.\d+)?)[,%2C]+(-?\d+(?:\.\d+)?)/i);
+  if (m) return [+m[1], +m[2]];
+  return null;
 }
 const LOST_LABEL = {not_sent:'ยังไม่ได้ส่ง', sending:'กำลังส่ง', sent:'ส่งแล้ว'};
 const LOST_CLASS = {not_sent:'b-notsent', sending:'b-sending', sent:'b-sent'};
@@ -529,9 +598,7 @@ function toRow(r){
     finishedAt: r.finished_at ? new Date(r.finished_at).getTime() : 0
   };
 }
-function matchText(r){
-  return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase();
-}
+function matchText(r){ return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase(); }
 function filtered(){
   const q = $('search').value.trim().toLowerCase();
   const from = $('dFrom').value, to = $('dTo').value;
@@ -555,11 +622,7 @@ function animateNumber(el, to){
   const from = parseInt(el.textContent) || 0;
   if (from === to) return;
   const start = performance.now(), dur = 500;
-  const step = t => {
-    const p = Math.min(1, (t - start) / dur);
-    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
-    if (p < 1) requestAnimationFrame(step);
-  };
+  const step = t => { const p = Math.min(1, (t - start) / dur); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
 function renderKpis(){
@@ -611,19 +674,71 @@ function renderHistory(){
       <td class="c-map">${r.link ? `<a class="link" href="${esc(mapUrl(r.link))}" target="_blank" rel="noopener">📍 เปิดแผนที่</a>` : '-'}</td>
       <td class="c-note">${esc(r.note)}</td>
       <td class="c-rec">${esc(r.recorder)} <span class="muted">(Finish ${fmtDate(r.finishedAt)})</span></td>
-      <td class="c-act"><div class="btns">
-        <button class="small danger" onclick="removeHistory('${r.id}')">🗑 ลบ</button>
-      </div></td>
+      <td class="c-act"><div class="btns"><button class="small danger" onclick="removeHistory('${r.id}')">🗑 ลบ</button></div></td>
     </tr>`).join('') || EMPTY('ยังไม่มีประวัติ');
   $('count').textContent = `ประวัติ ${list.length} รายการ`;
 }
+
+/* ---------- แผนที่ + กราฟ ---------- */
+let leafMap = null, mapLayer = null, chartZone = null, chartProv = null;
+function chartColors(){
+  const dark = currentTheme() === 'dark';
+  return { text: dark ? '#cbd5e1' : '#334155', grid: dark ? 'rgba(148,163,184,.15)' : 'rgba(15,23,42,.08)' };
+}
+function renderMap(){
+  const pts = data.map(r => ({ r, ll: parseLatLng(r.link) })).filter(x => x.ll);
+  $('mapSum').textContent = `มีพิกัด ${pts.length} จาก ${data.length} เครื่อง`;
+  if (!leafMap) {
+    leafMap = L.map('mapBox', { zoomControl: true }).setView([13.75, 100.5], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(leafMap);
+  }
+  if (mapLayer) mapLayer.clearLayers(); else mapLayer = L.layerGroup().addTo(leafMap);
+  const bounds = [];
+  pts.forEach(({ r, ll }) => {
+    const m = L.circleMarker(ll, { radius: 8, color:'#fff', weight:2, fillColor: r.lost_status==='sent' ? '#10b981' : r.lost_status==='sending' ? '#f59e0b' : '#f43f5e', fillOpacity:.95 });
+    m.bindPopup(`<b>${esc(r.school)}</b><br>${esc(r.province)} · Zone ${esc(r.zone)}<br>${esc(r.imei)}<br>${LOST_LABEL[r.lost_status]}<br><a href="https://www.google.com/maps?q=${ll[0]},${ll[1]}" target="_blank" rel="noopener">เปิดใน Google Maps</a>`);
+    m.addTo(mapLayer); bounds.push(ll);
+  });
+  if (bounds.length) leafMap.fitBounds(bounds, { padding:[30,30], maxZoom:12 });
+  setTimeout(() => leafMap.invalidateSize(), 150);
+  renderCharts();
+}
+function renderCharts(){
+  const c = chartColors();
+  const zc = ['1','2','3'].map(z => data.filter(r => r.zone === z).length);
+  const byProv = {};
+  data.forEach(r => { const p = r.province || 'ไม่ระบุ'; byProv[p] = (byProv[p] || 0) + 1; });
+  const provs = Object.entries(byProv).sort((a,b) => b[1]-a[1]);
+
+  if (chartZone) chartZone.destroy();
+  chartZone = new Chart($('chartZone'), {
+    type:'bar',
+    data:{ labels:['Zone 1','Zone 2','Zone 3'], datasets:[{ label:'จำนวนเครื่อง', data:zc,
+      backgroundColor:['#06b6d4','#2563eb','#10b981'], borderRadius:10 }] },
+    options:{ responsive:true, plugins:{ legend:{ display:false } },
+      scales:{ x:{ ticks:{color:c.text}, grid:{color:c.grid} }, y:{ beginAtZero:true, ticks:{ precision:0, color:c.text }, grid:{color:c.grid} } } }
+  });
+  if (chartProv) chartProv.destroy();
+  chartProv = new Chart($('chartProv'), {
+    type:'bar',
+    data:{ labels: provs.map(p=>p[0]), datasets:[{ label:'จำนวนเครื่อง', data: provs.map(p=>p[1]),
+      backgroundColor:'rgba(37,99,235,.75)', borderRadius:8 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{ legend:{ display:false } },
+      scales:{ x:{ beginAtZero:true, ticks:{ precision:0, color:c.text }, grid:{color:c.grid} }, y:{ ticks:{color:c.text}, grid:{display:false} } } }
+  });
+}
+function refreshChartsTheme(){ if (view === 'map' && (chartZone || chartProv)) renderCharts(); }
 
 function setView(v){
   view = v;
   $('tabMain').classList.toggle('on', v === 'main');
   $('tabHist').classList.toggle('on', v === 'history');
-  $('kpis').classList.toggle('hidden', v === 'history');
-  render();
+  $('tabMap').classList.toggle('on', v === 'map');
+  $('viewTable').classList.toggle('hidden', v === 'map');
+  $('viewMap').classList.toggle('hidden', v !== 'map');
+  if (v === 'map') renderMap(); else render();
 }
 function openM(id){ $(id).classList.add('show'); }
 function closeM(id){ $(id).classList.remove('show'); }
@@ -637,7 +752,7 @@ async function loadData(){
   if (a.error) { $('status').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + a.error.message; return; }
   data = a.data.map(toRow);
   if (!b.error) history = b.data.map(toRow);
-  render();
+  if (view === 'map') renderMap(); else render();
 }
 let channel = null;
 function subscribe(){
@@ -647,9 +762,7 @@ function subscribe(){
     .on('postgres_changes', { event: '*', schema: 'public', table: 'lost_history' }, () => loadData())
     .subscribe();
 }
-function unsubscribe(){
-  if (channel) { try { sb.removeChannel(channel); } catch(e){} channel = null; }
-}
+function unsubscribe(){ if (channel) { try { sb.removeChannel(channel); } catch(e){} channel = null; } }
 
 /* ---------- Auth ---------- */
 async function login(){
@@ -657,6 +770,7 @@ async function login(){
   if (error) return fail('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
   $('lPass').value = '';
   ok('เข้าสู่ระบบสำเร็จ');
+  burstConfetti('star');
   showApp();
 }
 function clearLocalSession(){
@@ -717,7 +831,7 @@ async function addRecord(){
     lost_at: new Date().toISOString()
   });
   if (error) return fail('บันทึกไม่สำเร็จ: ' + error.message);
-  closeM('mAdd'); ok('บันทึกรายการเรียบร้อย'); loadData();
+  closeM('mAdd'); ok('บันทึกรายการเรียบร้อย'); burstConfetti('paper'); loadData();
 }
 
 function openUpdate(id){
@@ -776,7 +890,9 @@ async function finishRecord(id){
   if (e1) return fail('ย้ายไปประวัติไม่สำเร็จ: ' + e1.message);
   const { error: e2 } = await sb.from('lost_records').delete().eq('id', id);
   if (e2) return fail('ลบรายการเดิมไม่สำเร็จ: ' + e2.message);
-  ok('Finish เรียบร้อย ย้ายไปประวัติแล้ว'); loadData();
+  ok('Finish เรียบร้อย ย้ายไปประวัติแล้ว');
+  burstConfetti('star');
+  loadData();
 }
 async function removeRecord(id){
   const c = await Swal.fire({ ...SWAL_BASE, title:'ลบรายการนี้?', text:'ลบแล้วกู้คืนไม่ได้', icon:'warning',
@@ -819,10 +935,7 @@ function exportCSV(){
 
 /* ---------- Interactions ---------- */
 document.querySelectorAll('.kpi').forEach(el => {
-  el.addEventListener('click', () => {
-    kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
-    render();
-  });
+  el.addEventListener('click', () => { kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k; render(); });
   el.addEventListener('mousemove', e => {
     const r = el.getBoundingClientRect();
     el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
@@ -835,9 +948,7 @@ $('btnClear').addEventListener('click', () => {
   ['fZone','fStatus','fLost'].forEach(id => $(id).value = 'all');
   kpiFilter = null; render();
 });
-document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
-  if (e.target === m) m.classList.remove('show');
-}));
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
 
 /* ---------- Start ---------- */
 applyTheme(currentTheme());
