@@ -56,30 +56,6 @@ body.login-bg{background:#0c4a6e url('On-dis.jpg') center/cover fixed no-repeat}
 body.app-bg::before{content:"";position:fixed;inset:0;background:url('SICCC.jpg') center/cover fixed no-repeat;z-index:-2;transform:scale(1.04)}
 body.app-bg::after{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 10%,rgba(13,148,136,.25),transparent 45%),radial-gradient(circle at 85% 90%,rgba(37,99,235,.22),transparent 50%),linear-gradient(160deg,var(--app-tint-1),var(--app-tint-2) 50%,var(--app-tint-3));z-index:-1;backdrop-filter:blur(2px)}
 
-/* ---------- โคมไฟ + สายดึง (หน้า Login) ---------- */
-#lampScreen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:rgba(2,12,20,.35);transition:opacity .6s ease,visibility .6s}
-#lampScreen::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,236,170,.0),rgba(0,0,0,.55) 70%);transition:opacity .8s;opacity:1;pointer-events:none}
-#lampScreen.lit::before{opacity:0}
-#lampScreen.gone{opacity:0;visibility:hidden}
-.lamp-glow{position:absolute;left:50%;top:0;width:520px;height:520px;transform:translateX(-50%) translateY(-40%);border-radius:50%;background:radial-gradient(circle,rgba(255,236,170,.55),rgba(255,236,170,.12) 45%,transparent 70%);opacity:0;transition:opacity 1s ease;pointer-events:none}
-#lampScreen.lit .lamp-glow{opacity:1}
-.lamp-title{position:relative;z-index:2;margin:0 0 6px;font-size:24px;font-weight:800;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.5)}
-.lamp-sub{position:relative;z-index:2;margin:0 0 44px;font-size:13px;color:rgba(255,255,255,.85);font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.pull-wrap{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-.cord{width:3px;height:110px;background:linear-gradient(180deg,#d4d4d8,#71717a);border-radius:2px;transform-origin:top center;transition:transform .25s cubic-bezier(.2,.9,.3,1.6);box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.pull-knob{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#a1a1aa 60%,#52525b);box-shadow:0 4px 12px rgba(0,0,0,.5);margin-top:-2px;transition:transform .25s cubic-bezier(.2,.9,.3,1.6)}
-.pull-wrap:hover .cord{transform:scaleY(1.06)}
-.pull-wrap.pulling .cord{animation:pullDown .55s cubic-bezier(.2,.9,.3,1.4) forwards}
-.pull-wrap.pulling .pull-knob{animation:knobDown .55s cubic-bezier(.2,.9,.3,1.4) forwards}
-.pull-hint{margin-top:14px;font-size:12px;color:rgba(255,255,255,.8);font-weight:700;letter-spacing:.5px;animation:blink 2s ease-in-out infinite;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-@keyframes pullDown{0%{transform:scaleY(1)}35%{transform:scaleY(1.45)}60%{transform:scaleY(.9)}100%{transform:scaleY(1.08)}}
-@keyframes knobDown{0%{transform:translateY(0)}35%{transform:translateY(38px)}60%{transform:translateY(-6px)}100%{transform:translateY(8px)}}
-@keyframes blink{0%,100%{opacity:.55}50%{opacity:1}}
-.lamp-bulb{position:absolute;top:12%;left:50%;width:120px;height:70px;transform:translateX(-50%);border-radius:0 0 60px 60px;background:radial-gradient(circle at 50% 80%,#fffbe6,#fde68a 60%,#78716c);box-shadow:none;opacity:.35;transition:opacity .6s,box-shadow .6s;pointer-events:none}
-#lampScreen.lit .lamp-bulb{opacity:1;box-shadow:0 0 60px 20px rgba(253,230,138,.7)}
-.lamp-shade{position:absolute;top:calc(12% - 14px);left:50%;width:170px;height:38px;transform:translateX(-50%);border-radius:90px 90px 6px 6px;background:linear-gradient(180deg,#3f3f46,#18181b);pointer-events:none;z-index:1}
-.lamp-wrap{position:relative;width:180px;height:200px;margin:0 auto 10px;z-index:2}
-
 /* ---------- Header ---------- */
 header{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   padding:12px 28px;min-height:84px;color:var(--hdr-text);
@@ -210,18 +186,31 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 a.link{color:#0891b2;font-weight:700;text-decoration:none}
 a.link:hover{text-decoration:underline}
 
-/* ---------- Login card (เปิดหลังดึงสาย) ---------- */
-#login{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:16px;pointer-events:none;opacity:0;transition:opacity .5s ease}
-#login.show{pointer-events:auto;opacity:1}
-#login .card{width:100%;max-width:420px;padding:32px 30px;background:var(--login-card);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid rgba(255,255,255,.25);border-radius:24px;box-shadow:0 24px 60px rgba(2,44,34,.5);transform:translateY(40px) scale(.95);opacity:0;transition:transform .7s cubic-bezier(.2,.9,.3,1.2),opacity .6s ease}
-#login.show .card{transform:none;opacity:1}
-#login h3{margin:0 0 4px;font-size:24px;font-weight:800;text-align:center;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-#login .login-sub{text-align:center;font-size:13px;color:var(--sub);margin-bottom:20px;font-weight:600}
-#login .field{font-size:14px;color:var(--heading);font-weight:700;margin-top:14px}
+/* ---------- Login: กล่องลอย + แอนิเมชัน ---------- */
+@keyframes loginFloat{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-12px) rotateX(2deg)}}
+@keyframes loginIn{0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(18deg)}60%{opacity:1;transform:translateY(-8px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:none}}
+@keyframes borderSpin{0%{--ang:0deg}100%{--ang:360deg}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.45),0 24px 60px rgba(2,44,34,.5)}50%{box-shadow:0 0 0 10px rgba(45,212,191,0),0 30px 70px rgba(8,145,178,.55)}}
+@keyframes titleIn{from{opacity:0;letter-spacing:.4em;filter:blur(6px)}to{opacity:1;letter-spacing:normal;filter:none}}
+@keyframes fieldIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes sheen{0%{transform:translateX(-120%) skewX(-20deg)}100%{transform:translateX(220%) skewX(-20deg)}}
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+#login{position:relative;max-width:430px;margin:70px auto;padding:0 16px;perspective:1200px;animation:loginFloat 6s ease-in-out infinite}
+#login .card{position:relative;padding:32px 30px;background:var(--login-card);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid rgba(255,255,255,.25);border-radius:24px;box-shadow:0 24px 60px rgba(2,44,34,.4);overflow:hidden;animation:loginIn .9s cubic-bezier(.2,.9,.3,1.1) both,glowPulse 4s ease-in-out 1s infinite}
+/* ขอบไล่สีที่หมุนได้ */
+#login .card::before{content:"";position:absolute;inset:-2px;border-radius:26px;padding:2px;background:conic-gradient(from var(--ang),#2dd4bf,#0891b2,#2563eb,#a78bfa,#2dd4bf);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderSpin 5s linear infinite;pointer-events:none;opacity:.85}
+/* แสงวิ่งผ่านการ์ด */
+#login .card::after{content:"";position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:sheen 4.5s ease-in-out 1.2s infinite;pointer-events:none}
+#login h3{margin:0 0 4px;font-size:24px;font-weight:800;text-align:center;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;animation:titleIn .9s ease .2s both}
+#login .login-sub{text-align:center;font-size:13px;color:var(--sub);margin-bottom:20px;font-weight:600;animation:fieldIn .6s ease .35s both}
+#login .field{font-size:14px;color:var(--heading);font-weight:700;margin-top:14px;animation:fieldIn .6s ease both}
+#login .field:nth-of-type(1){animation-delay:.45s}
+#login .field:nth-of-type(2){animation-delay:.55s}
 #login input{background:var(--input-bg);border:1px solid rgba(13,148,136,.35);padding:13px 14px;font-size:15px}
-#login button.login-btn{width:100%;margin-top:22px;padding:14px;font-size:16px;border-radius:14px}
-#login .close-x{position:absolute;top:14px;right:18px;background:transparent;box-shadow:none;color:var(--muted);padding:4px 8px;font-size:20px;border-radius:8px}
-#login .close-x:hover{background:rgba(148,163,184,.15);box-shadow:none;transform:none}
+#login input:focus{transform:translateY(-1px)}
+#login button.login-btn{width:100%;margin-top:22px;padding:14px;font-size:16px;border-radius:14px;animation:fieldIn .6s ease .7s both}
+#login button.login-btn:hover{transform:translateY(-3px) scale(1.01)}
 
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626;font-weight:600}
@@ -231,29 +220,11 @@ a.link:hover{text-decoration:underline}
 @media(max-width:700px){
   .grid2{grid-template-columns:1fr}main{padding:14px}header{padding:10px 14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}
   .table-wrap{max-height:70vh}.kpi .n{font-size:28px}
-  .lamp-title{font-size:19px}
 }
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
 <body class="login-bg">
-
-<!-- หน้าโคมไฟ + สายดึง -->
-<div id="lampScreen">
-  <div class="lamp-glow"></div>
-  <div class="lamp-wrap">
-    <div class="lamp-shade"></div>
-    <div class="lamp-bulb"></div>
-  </div>
-  <h2 class="lamp-title">Supreme Lost Mode Tracking</h2>
-  <div class="lamp-sub">ระบบติดตามเครื่องสำหรับโรงเรียน</div>
-  <div class="pull-wrap" id="pullWrap" onclick="pullCord()" role="button" aria-label="ดึงสายเพื่อเข้าสู่ระบบ" tabindex="0">
-    <div class="cord"></div>
-    <div class="pull-knob"></div>
-  </div>
-  <div class="pull-hint">คลิกหรือแตะสายเพื่อเข้าสู่ระบบ</div>
-</div>
-
 <header id="hdr">
   <div class="hdr-left">
     <h1>Supreme Lost Mode Tracking</h1>
@@ -266,9 +237,8 @@ a.link:hover{text-decoration:underline}
   </div>
 </header>
 
-<div id="login">
-  <div class="card" style="position:relative">
-    <button class="close-x" onclick="hideLogin()" aria-label="ปิด">×</button>
+<div id="login" class="hidden">
+  <div class="card">
     <h3>เข้าสู่ระบบ</h3>
     <div class="login-sub">Supreme Lost Mode Tracking</div>
     <div class="field">อีเมล<input id="lEmail" type="email" autocomplete="username"></div>
@@ -428,35 +398,6 @@ if (window.matchMedia) {
     let saved = null; try { saved = localStorage.getItem(THEME_KEY); } catch(err){}
     if (!saved) applyTheme(e.matches ? 'dark' : 'light');
   });
-}
-
-/* ---------- โคมไฟ / สายดึง ---------- */
-let pulled = false;
-function pullCord(){
-  if (pulled) return;
-  pulled = true;
-  const w = $('pullWrap');
-  w.classList.add('pulling');
-  $('lampScreen').classList.add('lit');
-  setTimeout(() => {
-    $('lampScreen').classList.add('gone');
-    showLogin();
-  }, 900);
-}
-document.getElementById('pullWrap').addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pullCord(); }
-});
-function showLoginCard(){
-  $('login').classList.add('show');
-  setTimeout(() => $('lEmail').focus(), 500);
-}
-function hideLogin(){
-  $('login').classList.remove('show');
-}
-function resetLamp(){
-  pulled = false;
-  $('pullWrap').classList.remove('pulling');
-  $('lampScreen').classList.remove('lit','gone');
 }
 
 /* ---------- ref_offices (คอลัมน์: จังหวัด, เขต) ---------- */
@@ -683,20 +624,16 @@ async function logout(){
   showLogin();
   ok('ออกจากระบบแล้ว');
 }
-/* กลับไปหน้าโคมไฟ */
 function showLogin(){
   data = []; history = []; render();
   $('app').classList.add('hidden');
   $('btnLogout').classList.add('hidden');
   document.body.classList.remove('app-bg');
   document.body.classList.add('login-bg');
-  hideLogin();
-  resetLamp();
-  $('lampScreen').classList.remove('gone');
+  $('login').classList.remove('hidden');
 }
 async function showApp(){
-  hideLogin();
-  $('lampScreen').classList.add('gone');
+  $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('btnLogout').classList.remove('hidden');
   document.body.classList.remove('login-bg');
@@ -854,15 +791,13 @@ $('btnClear').addEventListener('click', () => {
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
   if (e.target === m) m.classList.remove('show');
 }));
-$('login').addEventListener('click', e => { if (e.target === $('login')) hideLogin(); });
 
 /* ---------- Start ---------- */
 applyTheme(currentTheme());
 (async () => {
   let session = null;
   try { const r = await sb.auth.getSession(); session = r.data.session; } catch(e){}
-  if (session) showApp();
-  else { showLogin(); }
+  if (session) showApp(); else showLogin();
 })();
 </script>
 </body>
