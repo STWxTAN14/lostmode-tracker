@@ -443,6 +443,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 });
 
+/* ---------- ตัวช่วยพื้นฐาน (ต้องประกาศก่อนใช้งานทุกส่วน) ---------- */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+
 /* ---------- โหมดมืด / สว่าง ---------- */
 const THEME_KEY = 'lm_theme';
 function currentTheme(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
@@ -643,8 +647,6 @@ function confirmBox(opts){ return Swal.fire({ ...SWAL_BASE, icon:'question', sho
 /* ---------- State ---------- */
 let data = [], history = [];
 let view = 'main', kpiFilter = null, editingId = null, editingFrom = 'records';
-const $ = id => document.getElementById(id);
-const pad = n => String(n).padStart(2, '0');
 
 function fmtDate(ts){
   if (!ts) return '-';
@@ -919,9 +921,9 @@ function isFilled(id){ return ($(id).value || '').trim() !== ''; }
 function validateAdd(showErrors){
   const missing = [];
   REQUIRED.forEach(f => {
-    const ok = isFilled(f.input);
-    $(f.box).classList.toggle('invalid', !ok && !!showErrors);
-    if (!ok) missing.push(f.label);
+    const filled = isFilled(f.input);
+    $(f.box).classList.toggle('invalid', !filled && !!showErrors);
+    if (!filled) missing.push(f.label);
   });
   $('btnSave').disabled = missing.length > 0;
   $('addHint').textContent = missing.length ? `ยังขาด: ${missing.join(', ')}` : 'กรอกครบแล้ว กดบันทึกได้เลย';
