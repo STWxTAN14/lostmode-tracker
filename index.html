@@ -389,6 +389,7 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
     <h3 id="uTitle">🛠 แก้ไข / อัปเดตรายการ</h3>
     <div class="grid2">
       <div class="field full">ชื่อโรงเรียน<input id="eSchool"></div>
+      <div class="field full">SN / IMEI<input id="eImei" autocomplete="off"><span class="err" id="eImeiErr">กรุณากรอก SN / IMEI</span></div>
       <div class="field">จังหวัด
         <select id="eProvince"></select>
       </div>
@@ -610,16 +611,12 @@ function toRow(r){
 }
 function matchText(r){ return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase(); }
 
-/* ---------- ชุดข้อมูลตามแท็บ (ฐานเดียวสำหรับทั้งตารางและการ์ด) ----------
-   main / all  = ยังไม่ Finish ทั้งหมด
-   progress    = ยังไม่ Finish และสถานะกำลังส่ง
-   finish      = ประวัติ (lost_history)                                        */
+/* ---------- ชุดข้อมูลตามแท็บ ---------- */
 function baseListFor(v){
   if (v === 'finish') return history;
   if (v === 'progress') return data.filter(r => r.lost_status === 'sending');
   return data;
 }
-/* ตัวกรองทั้งหมดที่ผู้ใช้ตั้งไว้ (ไม่รวมการ์ด) */
 function applyToolbarFilters(list){
   const q = $('search').value.trim().toLowerCase();
   const from = $('dFrom').value, to = $('dTo').value;
@@ -634,7 +631,6 @@ function applyToolbarFilters(list){
     return true;
   });
 }
-/* ตัวกรองจากการ์ด KPI */
 const KPI_PREDICATE = {
   online:  r => r.status === 'online',
   offline: r => r.status === 'offline',
@@ -643,14 +639,10 @@ const KPI_PREDICATE = {
 };
 const KPI_NAME = { online:'สั่งเปิดขณะออนไลน์', offline:'สั่งเปิดขณะออฟไลน์', sent:'ส่ง Lost Mode แล้ว', notsent:'ยังไม่ได้ส่ง' };
 function applyKpi(list){ return kpiFilter ? list.filter(KPI_PREDICATE[kpiFilter]) : list; }
-
-/* รายการที่แสดงในตาราง = ฐาน → ตัวกรองทั้งหมด → ตัวกรองการ์ด */
 function filtered(){
   const list = applyKpi(applyToolbarFilters(baseListFor(view)));
   return list.sort((a,b) => view === 'finish' ? b.finishedAt - a.finishedAt : b.lostAt - a.lostAt);
 }
-
-/* การ์ด: นับจาก "ฐานเดียวกับตาราง" และผ่านตัวกรองทั้งหมดเหมือนกัน */
 function cardsBase(){ return applyToolbarFilters(baseListFor(view)); }
 
 function animateNumber(el, to){
@@ -667,12 +659,9 @@ function renderKpis(){
   animateNumber($('k3'), base.filter(KPI_PREDICATE.sent).length);
   animateNumber($('k4'), base.filter(KPI_PREDICATE.notsent).length);
   document.querySelectorAll('.kpi').forEach(el => el.classList.toggle('active', el.dataset.k === kpiFilter));
-  const note = $('kpiNote');
-  if (kpiFilter) {
-    note.innerHTML = `กำลังกรองตาราง: <b>${KPI_NAME[kpiFilter]}</b> <button class="ghost" onclick="clearKpi()">ยกเลิก</button>`;
-  } else {
-    note.innerHTML = `คลิกการ์ดเพื่อกรองตารางตามตัวเลขนั้น`;
-  }
+  $('kpiNote').innerHTML = kpiFilter
+    ? `กำลังกรองตาราง: <b>${KPI_NAME[kpiFilter]}</b> <button class="ghost" onclick="clearKpi()">ยกเลิก</button>`
+    : 'คลิกการ์ดเพื่อกรองตารางตามตัวเลขนั้น';
 }
 function clearKpi(){ kpiFilter = null; render(); }
 
@@ -876,7 +865,7 @@ REQUIRED.forEach(f => {
   }));
 });
 
-/* ---------- Add / Edit ---------- */
+/* ---------- Add ---------- */
 function openAdd(){
   ['aSchool','aImei','aPhone','aNote','aRecorder'].forEach(id => $(id).value = '');
   $('aZone').value = ''; $('aStatus').value = ''; $('aLost').value = '';
@@ -909,6 +898,7 @@ async function addRecord(){
   closeM('mAdd'); ok('บันทึกรายการเรียบร้อย'); burstConfetti('paper'); loadData();
 }
 
+/* ---------- Edit (รวม SN / IMEI) ---------- */
 function openUpdate(id, from){
   editingId = id;
   editingFrom = from || 'records';
@@ -917,6 +907,8 @@ function openUpdate(id, from){
   if (!r) return;
   $('uTitle').textContent = editingFrom === 'history' ? '🛠 แก้ไขรายการที่ Finish แล้ว' : '🛠 แก้ไข / อัปเดตรายการ';
   $('eSchool').value = r.school;
+  $('eImei').value = r.imei || '';
+  $('eImei').closest('.field').classList.remove('invalid');
   fillProvinceSelect($('eProvince'), r.province);
   if (r.province && !PROVINCES.includes(r.province)) {
     $('eProvince').insertAdjacentHTML('beforeend', `<option value="${esc(r.province)}" selected>${esc(r.province)} (ค่าเดิม)</option>`);
@@ -930,6 +922,9 @@ function openUpdate(id, from){
   openM('mUpd');
 }
 $('eProvince').addEventListener('change', e => fillOfficeSelect($('eOffice'), e.target.value, ''));
+$('eImei').addEventListener('input', () => {
+  if ($('eImei').value.trim()) $('eImei').closest('.field').classList.remove('invalid');
+});
 
 function openMapFromModal(){
   const url = mapUrl($('uLink').value.trim());
@@ -939,6 +934,11 @@ function openMapFromModal(){
 async function saveUpdate(){
   const school = $('eSchool').value.trim();
   if (!school) return warn('ชื่อโรงเรียนห้ามว่าง');
+  const imei = $('eImei').value.trim();
+  if (!imei) {
+    $('eImei').closest('.field').classList.add('invalid');
+    return warn('กรุณากรอก SN / IMEI');
+  }
   const province = $('eProvince').value;
   const office = $('eOffice').value;
   if (!province) return warn('กรุณาเลือกจังหวัด');
@@ -947,7 +947,7 @@ async function saveUpdate(){
   if (link && !mapUrl(link)) return warn('รูปแบบลิงก์หรือพิกัดไม่ถูกต้อง');
   const located = link ? 'yes' : $('uLoc').value;
   const payload = {
-    school, province, education_office: office,
+    school, imei, province, education_office: office,
     status: $('uStatus').value, lost_status: $('uLost').value, zone: $('uZone').value, link, located
   };
   const table = editingFrom === 'history' ? 'lost_history' : 'lost_records';
@@ -1016,10 +1016,7 @@ function exportCSV(){
 
 /* ---------- Interactions ---------- */
 document.querySelectorAll('.kpi').forEach(el => {
-  el.addEventListener('click', () => {
-    kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
-    render();
-  });
+  el.addEventListener('click', () => { kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k; render(); });
   el.addEventListener('mousemove', e => {
     const r = el.getBoundingClientRect();
     el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
