@@ -33,7 +33,7 @@
   --tabs-bg:rgba(255,255,255,.88);
   --app-tint-1:rgba(236,253,245,.55);--app-tint-2:rgba(224,247,250,.55);--app-tint-3:rgba(224,236,255,.6);
   --login-card:rgba(255,255,255,.78);--login-scrim:rgba(224,247,250,.25);--login-accent:#0d9488;
-  --bad:#dc2626;
+  --bad:#dc2626;--ok:#0d9488;
 }
 html[data-theme="dark"]{
   --ink:#e2e8f0;--muted:#94a3b8;--line:rgba(45,212,191,.18);
@@ -46,7 +46,7 @@ html[data-theme="dark"]{
   --tabs-bg:rgba(15,23,42,.88);
   --app-tint-1:rgba(2,6,23,.72);--app-tint-2:rgba(15,23,42,.72);--app-tint-3:rgba(8,47,73,.7);
   --login-card:rgba(15,23,42,.8);--login-scrim:rgba(2,6,23,.55);--login-accent:#2dd4bf;
-  --bad:#f87171;
+  --bad:#f87171;--ok:#2dd4bf;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -189,7 +189,7 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 .modal .box{background:var(--modal-bg);color:var(--ink);border-radius:22px;padding:26px;width:100%;max-width:640px;max-height:90vh;overflow:auto;box-shadow:0 30px 70px rgba(8,145,178,.35);animation:pop .35s cubic-bezier(.2,.9,.3,1.2);border:1px solid var(--line)}
 .modal h3{margin:0 0 18px;font-size:20px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--label);font-weight:700}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--label);font-weight:700;position:relative}
 .field input,.field select,.field textarea{font-size:15px;color:var(--ink);font-weight:400}
 .field input[readonly]{background:rgba(13,148,136,.08);color:var(--label);font-weight:600}
 .field .err{display:none;font-size:12px;color:var(--bad);font-weight:700;margin-top:2px}
@@ -201,6 +201,17 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 .muted{color:var(--muted);font-size:13px}
 a.link{color:#0891b2;font-weight:700;text-decoration:none}
 a.link:hover{text-decoration:underline}
+
+/* รายการแนะนำโรงเรียน */
+.school-sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--modal-bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(2,44,34,.25);max-height:260px;overflow:auto;z-index:70;display:none}
+.school-sug.show{display:block;animation:pop .2s ease}
+.school-sug .opt{padding:9px 12px;cursor:pointer;font-size:14px;color:var(--ink);border-bottom:1px solid var(--line)}
+.school-sug .opt:last-child{border-bottom:0}
+.school-sug .opt:hover,.school-sug .opt.act{background:rgba(13,148,136,.12)}
+.school-sug .opt small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.school-sug .none{padding:10px 12px;color:var(--muted);font-size:13px}
+.autofill-note{font-size:12px;font-weight:700;color:var(--ok);margin-top:2px;display:none}
+.autofill-note.show{display:block}
 
 @keyframes loginFloat{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-12px) rotateX(2deg)}}
 @keyframes loginIn{0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(18deg)}60%{opacity:1;transform:translateY(-8px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:none}}
@@ -233,7 +244,7 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
 #confettiCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:200}
 @media(max-width:700px){
   .grid2{grid-template-columns:1fr}main{padding:14px}header{padding:10px 14px}.hdr-logo{height:40px}.hdr-left h1{font-size:15px}
-  .table-wrap{max-height:70vh}.kpi .n{font-size:28px}#mapBox{height:360px}
+  .table-wrap{max-height:70vh}.kpi .n{font-size:28px}
 }
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 </style>
@@ -349,7 +360,12 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
   <div class="box">
     <h3>✨ เพิ่มรายการ Lost Mode</h3>
     <div class="grid2">
-      <div class="field" id="fSchool">ชื่อโรงเรียน<input id="aSchool" autocomplete="off"><span class="err">กรุณากรอกชื่อโรงเรียน</span></div>
+      <div class="field full" id="fSchool">ชื่อโรงเรียน
+        <input id="aSchool" autocomplete="off" placeholder="พิมพ์ชื่อโรงเรียน ระบบจะแนะนำให้เลือก">
+        <div class="school-sug" id="schoolSug"></div>
+        <span class="autofill-note" id="autoNote">เติมจังหวัดและ สพม./สพป. ให้อัตโนมัติแล้ว</span>
+        <span class="err">กรุณากรอกชื่อโรงเรียน</span>
+      </div>
       <div class="field" id="fProvince">จังหวัด
         <select id="aProvince"><option value="">-- เลือกจังหวัด --</option></select>
         <span class="err">กรุณาเลือกจังหวัด</span>
@@ -371,7 +387,7 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
         <span class="err">กรุณาเลือกสถานะเครื่อง</span>
       </div>
       <div class="field" id="fLost2">สถานะ Lost Mode
-        <select id="aLost"><option value="">-- เลือกสถานะ --</option><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sending">กำลังส่ง</option><option value="sent">ส่งแล้ว</option></select>
+        <select id="aLost"><option value="">-- เลือกสถานะ --</option><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sent">ส่งแล้ว</option></select>
         <span class="err">กรุณาเลือกสถานะ Lost Mode</span>
       </div>
       <div class="field full">หมายเหตุ<textarea id="aNote" rows="2"></textarea></div>
@@ -400,7 +416,7 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
         <select id="uStatus"><option value="online">Online</option><option value="offline">Offline</option></select>
       </div>
       <div class="field">สถานะ Lost Mode
-        <select id="uLost"><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sending">กำลังส่ง</option><option value="sent">ส่งแล้ว</option></select>
+        <select id="uLost"><option value="not_sent">ยังไม่ได้ส่ง</option><option value="sent">ส่งแล้ว</option></select>
       </div>
       <div class="field">Zone
         <select id="uZone"><option value="1">Zone 1</option><option value="2">Zone 2</option><option value="3">Zone 3</option></select>
@@ -526,7 +542,7 @@ function attachMagnetic(){
 new MutationObserver(attachMagnetic).observe(document.body, { childList: true, subtree: true });
 attachMagnetic();
 
-/* ---------- ref_offices ---------- */
+/* ---------- ref_offices (จังหวัด/เขต) ---------- */
 let REF = [], PROVINCES = [];
 async function loadRef(){
   const { data: rows, error } = await sb.from('ref_offices').select('*').limit(5000);
@@ -550,6 +566,61 @@ function fillOfficeSelect(sel, province, selected){
     list.map(o => `<option value="${esc(o)}" ${o===selected?'selected':''}>${esc(o)}${REF.some(r=>r.office===o)?'':' (ค่าเดิม)'}</option>`).join('');
   sel.disabled = false;
 }
+
+/* ---------- ref_schools (ชื่อโรงเรียน -> จังหวัด / สพม.สพป.) ---------- */
+let SCHOOLS = [];
+async function loadSchools(){
+  const { data: rows, error } = await sb.from('ref_schools').select('*').limit(5000);
+  if (error) { console.warn('โหลด ref_schools ไม่สำเร็จ', error.message); SCHOOLS = []; return; }
+  SCHOOLS = rows.map(r => ({
+    name: String(r['ชื่อโรงเรียน'] || '').trim(),
+    province: String(r['จังหวัด'] || '').trim(),
+    office: String(r['สพม./สพป.'] || '').trim()
+  })).filter(s => s.name);
+}
+let pickedSchool = null;
+function renderSchoolSug(){
+  const box = $('schoolSug');
+  const q = $('aSchool').value.trim();
+  if (!q) { box.classList.remove('show'); return; }
+  const hits = SCHOOLS.filter(s => s.name.includes(q)).slice(0, 30);
+  if (!hits.length) {
+    box.innerHTML = '<div class="none">ไม่พบโรงเรียนนี้ในรายการ เลือกจังหวัดและ สพม./สพป. เองได้</div>';
+  } else {
+    box.innerHTML = hits.map((s, i) =>
+      `<div class="opt" data-i="${i}"><b>${esc(s.name)}</b><small>${esc(s.province)} · ${esc(s.office)}</small></div>`).join('');
+    box.querySelectorAll('.opt').forEach((el, i) => el.addEventListener('mousedown', e => {
+      e.preventDefault(); applySchool(hits[i]);
+    }));
+  }
+  box.classList.add('show');
+}
+function applySchool(s){
+  $('aSchool').value = s.name;
+  pickedSchool = s;
+  fillProvinceSelect($('aProvince'), s.province);
+  fillOfficeSelect($('aOffice'), s.province, s.office);
+  $('schoolSug').classList.remove('show');
+  $('autoNote').classList.add('show');
+  REQUIRED.forEach(f => $(f.box).classList.remove('invalid'));
+  validateAdd(false);
+}
+$('aSchool').addEventListener('input', () => {
+  pickedSchool = null;
+  $('autoNote').classList.remove('show');
+  renderSchoolSug();
+  validateAdd(false);
+});
+$('aSchool').addEventListener('blur', () => setTimeout(() => $('schoolSug').classList.remove('show'), 150));
+$('aSchool').addEventListener('focus', renderSchoolSug);
+/* เติมอัตโนมัติเมื่อชื่อตรงกับรายการเดียวพอดี */
+function autoMatchSchool(){
+  const name = $('aSchool').value.trim();
+  if (!name) return;
+  const exact = SCHOOLS.filter(s => s.name === name);
+  if (exact.length === 1) applySchool(exact[0]);
+}
+$('aSchool').addEventListener('change', autoMatchSchool);
 
 /* ---------- SweetAlert2 ---------- */
 const SWAL_BASE = {
@@ -611,7 +682,6 @@ function toRow(r){
 }
 function matchText(r){ return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase(); }
 
-/* ---------- ชุดข้อมูลตามแท็บ ---------- */
 function baseListFor(v){
   if (v === 'finish') return history;
   if (v === 'progress') return data.filter(r => r.lost_status === 'sending');
@@ -828,7 +898,7 @@ async function showApp(){
   $('btnLogout').classList.remove('hidden');
   document.body.classList.remove('login-bg');
   document.body.classList.add('app-bg');
-  await loadRef();
+  await Promise.all([loadRef(), loadSchools()]);
   await loadData();
   subscribe();
 }
@@ -869,13 +939,15 @@ REQUIRED.forEach(f => {
 function openAdd(){
   ['aSchool','aImei','aPhone','aNote','aRecorder'].forEach(id => $(id).value = '');
   $('aZone').value = ''; $('aStatus').value = ''; $('aLost').value = '';
+  pickedSchool = null;
+  $('autoNote').classList.remove('show');
   fillProvinceSelect($('aProvince'), '');
   fillOfficeSelect($('aOffice'), '', '');
   REQUIRED.forEach(f => $(f.box).classList.remove('invalid'));
   validateAdd(false);
   openM('mAdd');
 }
-$('aProvince').addEventListener('change', e => { fillOfficeSelect($('aOffice'), e.target.value, ''); validateAdd(false); });
+$('aProvince').addEventListener('change', e => { fillOfficeSelect($('aOffice'), e.target.value, ''); $('autoNote').classList.remove('show'); validateAdd(false); });
 
 async function addRecord(){
   if (!validateAdd(true)) return;
@@ -898,7 +970,7 @@ async function addRecord(){
   closeM('mAdd'); ok('บันทึกรายการเรียบร้อย'); burstConfetti('paper'); loadData();
 }
 
-/* ---------- Edit (รวม SN / IMEI) ---------- */
+/* ---------- Edit ---------- */
 function openUpdate(id, from){
   editingId = id;
   editingFrom = from || 'records';
@@ -915,7 +987,11 @@ function openUpdate(id, from){
   }
   fillOfficeSelect($('eOffice'), r.province, r.office);
   $('uStatus').value = r.status;
-  $('uLost').value = r.lost_status;
+  const lostSel = $('uLost');
+  if (r.lost_status === 'sending' && !lostSel.querySelector('option[value="sending"]')) {
+    lostSel.insertAdjacentHTML('afterbegin', '<option value="sending">กำลังส่ง (ค่าเดิม)</option>');
+  }
+  lostSel.value = r.lost_status;
   $('uZone').value = ['1','2','3'].includes(r.zone) ? r.zone : '1';
   $('uLoc').value = r.located || 'no';
   $('uLink').value = r.link || '';
