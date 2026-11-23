@@ -704,8 +704,8 @@ function applyToolbarFilters(list){
   });
 }
 const KPI_PREDICATE = {
-  online:  r => r.status === 'online',
-  offline: r => r.status === 'offline',
+  online:  r => r.lost_status === 'sent' && r.status === 'online',
+  offline: r => r.lost_status === 'sent' && r.status === 'offline',
   sent:    r => r.lost_status === 'sent',
   notsent: r => r.lost_status === 'not_sent'
 };
