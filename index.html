@@ -110,6 +110,8 @@ main{padding:24px;max-width:1380px;margin:0 auto;animation:fadeUp .5s ease both}
 .kpi-note{margin:0 0 16px;font-size:12.5px;color:var(--muted);font-weight:600;min-height:20px}
 .kpi-note b{color:var(--heading)}
 .kpi-note button{padding:3px 10px;font-size:12px;border-radius:8px;margin-left:8px;box-shadow:none}
+.kpis.mode-progress .kpi.std{display:none}
+.kpis:not(.mode-progress) .kpi.prog{display:none}
 
 .card{background:var(--glass-strong);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -291,10 +293,12 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
 
   <div id="viewTable">
     <div class="kpis" id="kpis">
-      <div class="kpi c-blue" data-k="online"><span class="ico">🟦</span><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
-      <div class="kpi c-orange" data-k="offline"><span class="ico">🟧</span><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
-      <div class="kpi c-green" data-k="sent"><span class="ico">🟩</span><div class="n" id="k3">0</div><div class="l">ส่ง Lost Mode แล้ว</div></div>
-      <div class="kpi c-red" data-k="notsent"><span class="ico">🟥</span><div class="n" id="k4">0</div><div class="l">ยังไม่ได้ส่ง</div></div>
+      <div class="kpi std c-blue" data-k="online"><span class="ico">🟦</span><div class="n" id="k1">0</div><div class="l">สั่งเปิดขณะออนไลน์</div></div>
+      <div class="kpi std c-orange" data-k="offline"><span class="ico">🟧</span><div class="n" id="k2">0</div><div class="l">สั่งเปิดขณะออฟไลน์</div></div>
+      <div class="kpi std c-green" data-k="sent"><span class="ico">🟩</span><div class="n" id="k3">0</div><div class="l">ส่ง Lost Mode แล้ว</div></div>
+      <div class="kpi std c-red" data-k="notsent"><span class="ico">🟥</span><div class="n" id="k4">0</div><div class="l">ยังไม่ได้ส่ง</div></div>
+      <div class="kpi prog c-orange" data-k="progress"><span class="ico">⏳</span><div class="n" id="k5">0</div><div class="l">ระหว่างดำเนินการ</div></div>
+      <div class="kpi prog c-green" data-k="done"><span class="ico">✔</span><div class="n" id="k6">0</div><div class="l">เสร็จสิ้นแล้ว (อยู่หน้า Finish)</div></div>
     </div>
     <div class="kpi-note" id="kpiNote"></div>
 
@@ -684,9 +688,9 @@ function toRow(r){
 }
 function matchText(r){ return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase(); }
 
+/* หน้า Finish ใช้ history, หน้าอื่นใช้ data (เครื่องที่ยังไม่ Finish ทั้งหมด) */
 function baseListFor(v){
   if (v === 'finish') return history;
-  if (v === 'progress') return data.filter(r => r.lost_status === 'sending');
   return data;
 }
 function applyToolbarFilters(list){
@@ -703,6 +707,7 @@ function applyToolbarFilters(list){
     return true;
   });
 }
+/* ออนไลน์ + ออฟไลน์ = ส่งแล้ว (นับเฉพาะเครื่องที่ส่ง Lost Mode แล้ว) */
 const KPI_PREDICATE = {
   online:  r => r.lost_status === 'sent' && r.status === 'online',
   offline: r => r.lost_status === 'sent' && r.status === 'offline',
@@ -725,6 +730,15 @@ function animateNumber(el, to){
   requestAnimationFrame(step);
 }
 function renderKpis(){
+  const isProg = view === 'progress';
+  $('kpis').classList.toggle('mode-progress', isProg);
+  if (isProg) {
+    animateNumber($('k5'), cardsBase().length);
+    animateNumber($('k6'), applyToolbarFilters(history).length);
+    document.querySelectorAll('.kpi').forEach(el => el.classList.remove('active'));
+    $('kpiNote').innerHTML = 'คลิกการ์ด "เสร็จสิ้นแล้ว" เพื่อไปดูหน้า Finish';
+    return;
+  }
   const base = cardsBase();
   animateNumber($('k1'), base.filter(KPI_PREDICATE.online).length);
   animateNumber($('k2'), base.filter(KPI_PREDICATE.offline).length);
@@ -1094,7 +1108,12 @@ function exportCSV(){
 
 /* ---------- Interactions ---------- */
 document.querySelectorAll('.kpi').forEach(el => {
-  el.addEventListener('click', () => { kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k; render(); });
+  el.addEventListener('click', () => {
+    if (el.dataset.k === 'done') return setView('finish');
+    if (el.dataset.k === 'progress') return;
+    kpiFilter = kpiFilter === el.dataset.k ? null : el.dataset.k;
+    render();
+  });
   el.addEventListener('mousemove', e => {
     const r = el.getBoundingClientRect();
     el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
