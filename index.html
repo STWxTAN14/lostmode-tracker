@@ -204,7 +204,6 @@ html[data-theme="dark"] .b-office{background:rgba(219,39,119,.22);color:#f9a8d4}
 a.link{color:#0891b2;font-weight:700;text-decoration:none}
 a.link:hover{text-decoration:underline}
 
-/* รายการแนะนำโรงเรียน */
 .school-sug{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--modal-bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(2,44,34,.25);max-height:260px;overflow:auto;z-index:70;display:none}
 .school-sug.show{display:block;animation:pop .2s ease}
 .school-sug .opt{padding:9px 12px;cursor:pointer;font-size:14px;color:var(--ink);border-bottom:1px solid var(--line)}
@@ -215,6 +214,7 @@ a.link:hover{text-decoration:underline}
 .autofill-note{font-size:12px;font-weight:700;color:var(--ok);margin-top:2px;display:none}
 .autofill-note.show{display:block}
 
+/* ---------- Login ---------- */
 @keyframes loginFloat{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-12px) rotateX(2deg)}}
 @keyframes loginIn{0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(18deg)}60%{opacity:1;transform:translateY(-8px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:none}}
 @keyframes borderSpin{0%{--ang:0deg}100%{--ang:360deg}}
@@ -235,8 +235,20 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
 #login .field{font-size:14px;color:var(--heading);font-weight:700;margin-top:14px;animation:fieldIn .6s ease both}
 #login .field:nth-of-type(1){animation-delay:.45s}
 #login .field:nth-of-type(2){animation-delay:.55s}
-#login input{background:var(--input-bg);border:1px solid rgba(13,148,136,.35);padding:13px 14px;font-size:15px}
+#login input{background:var(--input-bg);border:1px solid rgba(13,148,136,.35);padding:13px 14px;font-size:15px;width:100%}
+#login .pass-wrap{position:relative}
+#login .pass-wrap input{padding-right:48px}
+#login .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;padding:0;border-radius:10px;background:transparent;color:var(--heading);box-shadow:none;font-size:18px;display:inline-flex;align-items:center;justify-content:center}
+#login .eye:hover{background:rgba(13,148,136,.12);box-shadow:none}
+#login .remember-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px;color:var(--heading);font-weight:700;animation:fieldIn .6s ease .62s both}
+#login .remember-row label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+#login .remember-row input[type=checkbox]{width:18px;height:18px;accent-color:#0891b2;padding:0;cursor:pointer}
+#login .link-btn{background:none;box-shadow:none;color:#0891b2;padding:4px 6px;font-size:12.5px;font-weight:700;border-radius:8px}
+#login .link-btn:hover{background:rgba(8,145,178,.1);box-shadow:none;transform:none}
+#login .caps-hint{font-size:12px;color:#d97706;font-weight:700;margin-top:6px;display:none}
+#login .caps-hint.show{display:block}
 #login button.login-btn{width:100%;margin-top:22px;padding:14px;font-size:16px;border-radius:14px;animation:fieldIn .6s ease .7s both}
+#login button.login-btn.loading{pointer-events:none;opacity:.8}
 
 .hidden{display:none !important}
 #status{font-size:13px;margin-top:10px;color:#dc2626;font-weight:600}
@@ -277,8 +289,18 @@ html[data-theme="dark"] #login{--login-glow:rgba(45,212,191,.55);--login-glow2:r
     <h3>เข้าสู่ระบบ</h3>
     <div class="login-sub">Supreme Lost Mode Tracking</div>
     <div class="field">อีเมล<input id="lEmail" type="email" autocomplete="username"></div>
-    <div class="field">รหัสผ่าน<input id="lPass" type="password" autocomplete="current-password"></div>
-    <button class="login-btn" onclick="login()">เข้าสู่ระบบ</button>
+    <div class="field">รหัสผ่าน
+      <div class="pass-wrap">
+        <input id="lPass" type="password" autocomplete="current-password">
+        <button type="button" class="eye" id="eyeBtn" onclick="togglePass()" title="แสดง / ซ่อนรหัสผ่าน" aria-label="แสดงหรือซ่อนรหัสผ่าน">👁</button>
+      </div>
+      <span class="caps-hint" id="capsHint">⚠ ปุ่ม Caps Lock เปิดอยู่</span>
+    </div>
+    <div class="remember-row">
+      <label><input type="checkbox" id="rememberMe"> จำรหัสผ่านไว้ในเครื่องนี้</label>
+      <button type="button" class="link-btn" onclick="forgetSaved()">ลืมที่จำไว้</button>
+    </div>
+    <button class="login-btn" id="btnLogin" onclick="login()">เข้าสู่ระบบ</button>
   </div>
 </div>
 
@@ -472,6 +494,52 @@ if (window.matchMedia) {
   });
 }
 
+/* ---------- จำอีเมล / รหัสผ่าน (localStorage) ---------- */
+const CRED_KEY = 'lm_cred';
+function loadSavedCred(){
+  try { return JSON.parse(localStorage.getItem(CRED_KEY) || 'null'); } catch(e){ return null; }
+}
+function saveCred(email, pass, remember){
+  try {
+    if (remember) localStorage.setItem(CRED_KEY, JSON.stringify({ email, pass }));
+    else {
+      const old = loadSavedCred() || {};
+      localStorage.setItem(CRED_KEY, JSON.stringify({ email, pass: '' }));
+    }
+  } catch(e){}
+}
+function forgetSaved(){
+  confirmBox({ title:'ลบรหัสที่จำไว้?', text:'อีเมลและรหัสผ่านที่จำไว้ในเครื่องนี้จะถูกลบ', confirmButtonText:'ลบ' }).then(r => {
+    if (!r.isConfirmed) return;
+    try { localStorage.removeItem(CRED_KEY); } catch(e){}
+    $('lEmail').value = ''; $('lPass').value = ''; $('rememberMe').checked = false;
+    ok('ลบข้อมูลที่จำไว้แล้ว');
+  });
+}
+function prefillLogin(){
+  const c = loadSavedCred();
+  if (!c) return;
+  if (c.email) $('lEmail').value = c.email;
+  if (c.pass) { $('lPass').value = c.pass; $('rememberMe').checked = true; }
+}
+function togglePass(){
+  const inp = $('lPass');
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  $('eyeBtn').textContent = show ? '🙈' : '👁';
+}
+/* แจ้งเตือนเมื่อ Caps Lock เปิดอยู่ */
+function capsCheck(e){
+  const on = e.getModifierState && e.getModifierState('CapsLock');
+  $('capsHint').classList.toggle('show', !!on);
+}
+$('lPass').addEventListener('keyup', capsCheck);
+$('lPass').addEventListener('keydown', capsCheck);
+/* กด Enter ในช่องอีเมลหรือรหัสผ่านเพื่อเข้าสู่ระบบ */
+['lEmail','lPass'].forEach(id => $(id).addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); login(); }
+}));
+
 /* ---------- อนุภาค ---------- */
 (function makeParticles(){
   const box = document.getElementById('particles');
@@ -621,7 +689,6 @@ $('aSchool').addEventListener('input', () => {
 });
 $('aSchool').addEventListener('blur', () => setTimeout(() => $('schoolSug').classList.remove('show'), 150));
 $('aSchool').addEventListener('focus', renderSchoolSug);
-/* เติมอัตโนมัติเมื่อชื่อตรงกับรายการเดียวพอดี */
 function autoMatchSchool(){
   const name = $('aSchool').value.trim();
   if (!name) return;
@@ -688,7 +755,6 @@ function toRow(r){
 }
 function matchText(r){ return `${r.school}${r.province}${r.office}${r.model}${r.imei}${r.phone}${r.note}${r.recorder}`.toLowerCase(); }
 
-/* หน้า Finish ใช้ history, หน้าอื่นใช้ data (เครื่องที่ยังไม่ Finish ทั้งหมด) */
 function baseListFor(v){
   if (v === 'finish') return history;
   return data;
@@ -707,7 +773,6 @@ function applyToolbarFilters(list){
     return true;
   });
 }
-/* ออนไลน์ + ออฟไลน์ = ส่งแล้ว (นับเฉพาะเครื่องที่ส่ง Lost Mode แล้ว) */
 const KPI_PREDICATE = {
   online:  r => r.lost_status === 'sent' && r.status === 'online',
   offline: r => r.lost_status === 'sent' && r.status === 'offline',
@@ -881,8 +946,16 @@ function unsubscribe(){ if (channel) { try { sb.removeChannel(channel); } catch(
 
 /* ---------- Auth ---------- */
 async function login(){
-  const { error } = await sb.auth.signInWithPassword({ email: $('lEmail').value.trim(), password: $('lPass').value });
+  const email = $('lEmail').value.trim();
+  const pass = $('lPass').value;
+  if (!email || !pass) return fail('กรุณากรอกอีเมลและรหัสผ่าน');
+  const btn = $('btnLogin');
+  btn.classList.add('loading'); btn.textContent = 'กำลังเข้าสู่ระบบ...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.classList.remove('loading'); btn.textContent = 'เข้าสู่ระบบ';
   if (error) return fail('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
+  saveCred(email, pass, $('rememberMe').checked);
+  if (!$('rememberMe').checked) { /* เก็บเฉพาะอีเมลล่าสุด */ }
   $('lPass').value = '';
   ok('เข้าสู่ระบบสำเร็จ');
   burstConfetti('star');
@@ -907,6 +980,7 @@ function showLogin(){
   document.body.classList.remove('app-bg');
   document.body.classList.add('login-bg');
   $('login').classList.remove('hidden');
+  prefillLogin();
 }
 async function showApp(){
   $('login').classList.add('hidden');
